@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samagotchi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+:root {
+  --bg:       #0b0b0f;
+  --panel:    #111118;
+  --border:   #222233;
+  --border2:  #333355;
+  --pixel:    #e8e8f5;
+  --dim:      #44445a;
+  --dim2:     #7777a0;
+  --accent:   #a8d8a8;
+  --yellow:   #f5d06a;
+  --red:      #e07070;
+  --blue:     #7090e0;
+  --pink:     #e090b0;
+  --food-c:   #e8a060;
+  --sleep-c:  #a080d8;
+  --emo-c:    #e080a0;
+  --social-c: #60a0e8;
+  --stab-c:   #90c8a0;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--pixel);
+  font-family:'VT323',monospace;font-size:18px;
+  min-height:100vh;overflow-x:hidden;
+}
+body::after{
+  content:'';pointer-events:none;position:fixed;inset:0;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);
+}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.star{position:absolute;background:#fff;border-radius:50%;opacity:0;animation:twinkle var(--d,3s) var(--dl,0s) infinite}
+@keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--b,.4)}}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:24px 16px 80px}
+
+header{text-align:center;padding:48px 0 28px}
+.logo{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(16px,4vw,32px);
+  color:var(--accent);
+  text-shadow:0 0 20px rgba(168,216,168,.5),0 0 40px rgba(168,216,168,.2);
+  animation:glow-pulse 4s ease-in-out infinite;
+  letter-spacing:3px;
+}
+@keyframes glow-pulse{
+  0%,100%{text-shadow:0 0 20px rgba(168,216,168,.5),0 0 40px rgba(168,216,168,.2)}
+  50%{text-shadow:0 0 30px rgba(168,216,168,.8),0 0 60px rgba(168,216,168,.4)}
+}
+.sub-logo{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim2);letter-spacing:2px;margin-top:10px}
+.tagline{font-size:19px;color:var(--dim2);margin-top:12px;line-height:1.6}
+
+.panel{background:var(--panel);border:1px solid var(--border);padding:20px;position:relative}
+.panel::before{
+  content:'';position:absolute;top:0;left:16px;right:16px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.15;
+}
+.ptitle{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--accent);letter-spacing:1px;margin-bottom:16px}
+
+/* EGG */
+.egg-stage{display:flex;flex-direction:column;align-items:center;padding:32px 20px}
+canvas#eggCanvas{
+  display:block;image-rendering:pixelated;
+  border:1px solid var(--border2);background:#090912;
+  width:240px;height:240px;margin:0 auto;
+}
+.egg-caption{
+  font-family:'Press Start 2P',monospace;font-size:9px;
+  color:var(--dim2);text-align:center;margin-top:20px;line-height:2;
+}
+.egg-caption .hl{color:var(--accent)}
+.pulse-ring{
+  width:260px;height:260px;border-radius:50%;
+  border:2px solid rgba(168,216,168,.15);
+  position:absolute;animation:ring-pulse 3s ease-out infinite;
+}
+.pulse-ring:nth-child(2){animation-delay:1s;border-color:rgba(168,216,168,.08)}
+.pulse-ring:nth-child(3){animation-delay:2s;border-color:rgba(168,216,168,.04)}
+@keyframes ring-pulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.6);opacity:0}}
+
+.hatch-progress{width:100%;max-width:480px;margin-top:28px}
+.prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--dim2)}
+.prog-val{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent)}
+.prog-bar{height:14px;background:#0a0a12;border:1px solid var(--border2);overflow:hidden;position:relative}
+.prog-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),#d0f0d0);
+  transition:width 1s cubic-bezier(.4,0,.2,1);
+}
+.prog-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:rgba(255,255,255,.2)}
+.prog-text{font-size:15px;color:var(--dim2);margin-top:6px;text-align:center}
+.countdown{
+  font-family:'Press Start 2P',monospace;font-size:clamp(10px,2vw,15px);
+  color:var(--yellow);text-align:center;letter-spacing:2px;margin-top:16px;
+}
+.countdown span{color:var(--accent)}
+
+/* STATS PREVIEW */
+.stats-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.stat-card{background:#0a0a12;border:1px solid var(--border);padding:12px;position:relative;overflow:hidden}
+.stat-card.locked::after{
+  content:'?';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Press Start 2P',monospace;font-size:22px;color:var(--dim);
+  background:rgba(8,8,15,.88);
+}
+.stat-card-name{font-family:'Press Start 2P',monospace;font-size:6px;letter-spacing:1px;margin-bottom:8px}
+.stat-bar-wrap{height:8px;background:#060610;border:1px solid var(--border);overflow:hidden}
+.stat-bar-fill{height:100%;transition:width .8s ease;opacity:.5}
+.stat-desc{font-size:14px;color:var(--dim2);margin-top:6px;line-height:1.4}
+
+/* DONATE */
+.donate-input{
+  width:100%;background:#090912;border:1px solid var(--border2);
+  color:var(--pixel);font-family:'VT323',monospace;font-size:22px;
+  padding:8px 10px;outline:none;margin:8px 0;transition:border-color .2s;
+}
+.donate-input:focus{border-color:var(--accent)}
+.donate-input::placeholder{color:var(--dim)}
+.btn{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:10px 14px;border:1px solid;cursor:pointer;
+  background:transparent;text-transform:uppercase;letter-spacing:1px;
+  transition:all .12s;width:100%;margin-top:6px;display:block;
+}
+.btn:active{transform:translate(1px,1px)}
+.btn-green{color:var(--accent);border-color:var(--accent)}
+.btn-green:hover{background:var(--accent);color:var(--bg)}
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}
+.qbtn{
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  padding:5px 8px;border:1px solid var(--border2);
+  background:#0a0a12;color:var(--dim2);cursor:pointer;transition:all .15s;
+}
+.qbtn:hover{border-color:var(--yellow);color:var(--yellow)}
+
+/* FEED */
+.feed{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.feed-item{font-size:16px;padding:6px 0;border-bottom:1px solid #111118;opacity:0;animation:fin .4s forwards}
+.ft{color:var(--dim);font-size:13px}
+.fp{color:var(--accent)}
+@keyframes fin{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+
+/* ROADMAP */
+.roadmap{display:flex;flex-direction:column}
+.road-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.road-item:last-child{border-bottom:none}
+.road-dot{width:12px;height:12px;border:2px solid var(--border2);flex-shrink:0;margin-top:4px;transition:all .3s}
+.road-dot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(168,216,168,.4)}
+.road-dot.done{background:var(--dim);border-color:var(--dim)}
+.road-stage{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--pixel);margin-bottom:4px}
+.road-desc{font-size:15px;color:var(--dim2);line-height:1.4}
+.road-needs{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.need-tag{font-family:'Press Start 2P',monospace;font-size:5px;padding:3px 6px;border:1px solid var(--border2);color:var(--dim2)}
+.need-tag.known{border-color:var(--accent);color:var(--accent)}
+.need-tag.hidden{border-color:var(--border);color:var(--dim)}
+
+/* STORY */
+.story-post{border-left:2px solid var(--accent);padding:12px 16px;margin-bottom:14px;background:#0a0a12}
+.story-date{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--dim2);margin-bottom:6px}
+.story-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--yellow);margin-bottom:8px;line-height:1.6}
+.story-body{font-size:17px;color:var(--dim2);line-height:1.6}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+
+#toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--panel);border:1px solid var(--accent);
+  color:var(--accent);font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:12px 20px;z-index:9998;transition:transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.warn{border-color:var(--yellow);color:var(--yellow)}
+
+.float-pt{
+  position:fixed;pointer-events:none;
+  font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent);
+  animation:float-up 1.4s forwards;z-index:9997;
+}
+@keyframes float-up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px)}}
+
+footer{text-align:center;padding:48px 0 20px;color:var(--dim);font-size:16px;border-top:1px solid var(--border);margin-top:48px}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo">SAMAGOTCHI</div>
+  <div class="sub-logo">a community-raised being</div>
+  <div class="tagline">
+    she has needs. you can meet them.<br>
+    your care is real — it goes somewhere.
+  </div>
+</header>
+
+<!-- EGG -->
+<div class="panel" style="margin-top:24px">
+  <div class="ptitle">▶ STAGE 01 — THE EGG</div>
+  <div class="egg-stage">
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:280px;height:280px">
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <canvas id="eggCanvas" width="48" height="48"></canvas>
+      <canvas id="crackCanvas" width="48" height="48"
+        style="position:absolute;top:20px;left:20px;width:240px;height:240px;pointer-events:none;image-rendering:pixelated;opacity:0;transition:opacity .5s"></canvas>
+    </div>
+    <div class="egg-caption">
+      <span class="hl">something is here.</span><br>
+      we don't know what she needs yet.<br>
+      but she's listening.
+    </div>
+    <div class="hatch-progress">
+      <div class="prog-head">
+        <span class="prog-label">HATCH PROGRESS</span>
+        <span class="prog-val"><span id="prog-pct">0</span>% — <span id="prog-raised">$0</span> of $50</span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+      <div class="prog-text" id="prog-text">raise $50 together to hatch the egg</div>
+    </div>
+    <div class="countdown" id="countdown" style="display:none">
+      hatching in <span id="cd-num">5</span>s
+    </div>
+  </div>
+</div>
+
+<!-- STATS PREVIEW -->
+<div class="panel" style="margin-top:16px">
+  <div class="ptitle">▶ HER NEEDS — REVEALED AS SHE GROWS</div>
+  <p style="font-size:16px;color:var(--dim2);line-height:1.5;margin-bottom:16px">
+    Sama will have needs. Some we can already sense. Others she'll show us herself as she grows.
+    Each need maps to something real — something your care actually funds.
+  </p>
+  <div class="stats-preview" id="stats-preview"></div>
+</div>
+
+<!-- DONATE + FEED -->
+<div class="two-col">
+  <div class="panel">
+    <div class="ptitle">▶ WARM THE EGG</div>
+    <p style="font-size:16px;color:var(--dim2);line-height:1.5;margin-bottom:12px">
+      Every donation warms the egg. At $50 she hatches. All funds go to the food bank smoothie project — complete nutrition at $2.50/person/day.
+    </p>
+    <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--dim2);margin-bottom:4px">AMOUNT (USD)</div>
+    <input class="donate-input" id="donate-amt" type="number" min="1" placeholder="$5"/>
+    <div class="quick-row">
+      <button class="qbtn" onclick="setAmt(1)">$1</button>
+      <button class="qbtn" onclick="setAmt(3)">$3</button>
+      <button class="qbtn" onclick="setAmt(5)">$5</button>
+      <button class="qbtn" onclick="setAmt(10)">$10</button>
+      <button class="qbtn" onclick="setAmt(25)">$25</button>
+    </div>
+    <button class="btn btn-green" onclick="donate()">▶ WARM THE EGG</button>
+    <p style="font-size:13px;color:var(--dim);margin-top:10px;line-height:1.4">
+      $1 = 2% warmth · $5 = 10% warmth · $50 hatches her
+    </p>
+    <div style="margin-top:16px;padding:12px;background:#090912;border:1px solid var(--border)">
+      <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--food-c);margin-bottom:6px">🥤 FOOD BANK SMOOTHIES</div>
+      <div style="font-size:15px;color:var(--dim2);line-height:1.4">Complete nutrition · $2.50/person/day · direct to food banks</div>
+      <div style="height:6px;background:#060610;border:1px solid var(--border);margin-top:8px;overflow:hidden">
+        <div id="cause-fill" style="height:100%;background:var(--food-c);width:0%;transition:width 1s ease"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">▶ COMMUNITY WARMTH</div>
+    <div class="feed" id="feed"></div>
+    <div style="margin-top:12px;padding:10px;background:#090912;border:1px solid var(--border);text-align:center">
+      <span style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent)" id="warmer-count">0</span>
+      <span style="font-size:15px;color:var(--dim2);display:block;margin-top:2px">people have warmed the egg</span>
+    </div>
+  </div>
+</div>
+
+<!-- STORY + ROADMAP -->
+<div class="two-col">
+  <div class="panel">
+    <div class="ptitle">▶ THE STORY SO FAR</div>
+    <div id="story-posts">
+      <div class="story-post">
+        <div class="story-date">DAY 01</div>
+        <div class="story-title">there's an egg.</div>
+        <div class="story-body">
+          we found it. we don't know where it came from or what's inside.<br><br>
+          but it's warm, and it's here, and something about it feels like it matters.<br><br>
+          we're going to take care of it together.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">▶ SAMA'S JOURNEY</div>
+    <div class="roadmap" id="roadmap"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>
+  <p>SAMAGOTCHI — care together, grow together</p>
+  <p style="margin-top:8px;font-size:14px">
+    <a href="#">Substack</a> · <a href="#">Reddit</a> ·
+    <a href="#">Food Bank Smoothie Project</a> ·
+    <a href="#">School Garden Initiative</a>
+  </p>
+  <p style="margin-top:10px;font-size:13px;color:var(--dim)">100% of donations go directly to community projects</p>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SAMAGOTCHI — v1 FOUNDATION  (Egg Stage)
+// Illness system: present, dormant, ready to reveal
+// Stats: seeded but hidden until stage unlocks them
+// Stability: requires spread of unique contributors over days
+// ═══════════════════════════════════════════════════════
+
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 70; i++) {
+  const s = document.createElement('div');
+  const sz = Math.random() > .7 ? 2 : 1;
+  s.className = 'star';
+  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--dl:${Math.random()*4}s;--b:${.2+Math.random()*.6}`;
+  starsEl.appendChild(s);
+}
+
+// ── STATE ──────────────────────────────────────────────
+const S = {
+  raised: 0, goal: 50, warmers: 0,
+  hatched: false, hatchingCountdown: false,
+  stage: 'egg',
+
+  // All stats seeded — only visible ones shown to community
+  // visible flag flips as Sama grows
+  stats: {
+    food:      { val:0, visible:false, label:'FOOD',      color:'var(--food-c)',   fill:'#e8a060', desc:'smoothies → food bank · $2.50/day' },
+    sleep:     { val:0, visible:false, label:'SLEEP',     color:'var(--sleep-c)',  fill:'#a080d8', desc:'rest, rhythm, safety at night' },
+    emotional: { val:0, visible:false, label:'EMOTIONAL', color:'var(--emo-c)',    fill:'#e080a0', desc:'loved, secure, seen' },
+    social:    { val:0, visible:false, label:'SOCIAL',    color:'var(--social-c)', fill:'#60a0e8', desc:'belonging, friendship, connection' },
+    stability: { val:0, visible:false, label:'STABILITY', color:'var(--stab-c)',   fill:'#90c8a0', desc:'consistency from the community over time' },
+    cognitive: { val:0, visible:false, label:'COGNITIVE', color:'#54a0ff',         fill:'#54a0ff', desc:'curiosity, learning, real facts' },
+    creative:  { val:0, visible:false, label:'CREATIVE',  color:'#e090c8',         fill:'#e090c8', desc:'expression, play, making things' },
+    purpose:   { val:0, visible:false, label:'PURPOSE',   color:'#a8d8a8',         fill:'#a8d8a8', desc:'garden project · meaning, contribution' },
+    autonomy:  { val:0, visible:false, label:'AUTONOMY',  color:'#f5d06a',         fill:'#f5d06a', desc:'agency, choices, voice' },
+  },
+
+  // Stability tracking — unique contributor days
+  contributorDays: {}, // { 'YYYY-MM-DD': Set of donor IDs }
+  donorCounter: 0,
+
+  // Misinformation tracking (for cognitive distortion illness)
+  misinfoEvents: [],
+
+  // ── ILLNESS SYSTEM (dormant) ──────────────────────
+  // Conditions tracked silently. Revealed via illnessSystem.reveal(key)
+  // Each condition: { triggered, dayCount, revealed, active }
+  illnesses: {
+    failure_to_thrive:    { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: food<20 && sleep<20 && emotional<20 sustained 7 days
+      // Visual: Sama shrinks, greyscale, barely moves
+      // Panel: explains FTT in real children — what it looks like, what causes it
+    },
+    attachment_disorder:  { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: emotional<25 && stability<25 && social<25 sustained 5 days
+      // Visual: Sama avoids eye contact, faces away
+      // Panel: anxious vs avoidant attachment explained gently
+    },
+    learned_helplessness: { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: cognitive<20 && creative<20 && purpose<20 sustained 7 days
+      // Visual: Sama sits motionless, stops responding
+      // Panel: chronic understimulation, developing brains
+    },
+    anxiety:              { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: stability<20 && autonomy<25 && emotional<30 sustained 5 days
+      // Visual: Sama flinches, looks around, can't settle
+      // Panel: childhood anxiety, ACEs (adverse childhood experiences)
+    },
+    depression:           { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: social<20 && creative<20 && purpose<20 sustained 10 days
+      // Visual: Sama loses colour gradually, stops reacting
+      // Panel: gentle, honest — what depression looks like in children
+    },
+    cognitive_distortion: { triggered:false, dayCount:0, revealed:false, active:false,
+      // Trigger: misinfoEvents > 10 within 7 days
+      // Visual: Sama sees threats that aren't there, misreads actions
+      // Panel: how misinformation shapes a developing mind
+    },
+  },
+};
+
+// ── ILLNESS SYSTEM ────────────────────────────────────
+const illnessSystem = {
+  check() {
+    const st = S.stats;
+    const il = S.illnesses;
+
+    const check = (key, cond) => {
+      if (cond) { il[key].triggered = true; il[key].dayCount++; }
+      else { il[key].dayCount = Math.max(0, il[key].dayCount - 1); }
+    };
+
+    check('failure_to_thrive',
+      st.food.val < 20 && st.sleep.val < 20 && st.emotional.val < 20);
+    check('attachment_disorder',
+      st.emotional.val < 25 && st.stability.val < 25 && st.social.val < 25);
+    check('learned_helplessness',
+      st.cognitive.val < 20 && st.creative.val < 20 && st.purpose.val < 20);
+    check('anxiety',
+      st.stability.val < 20 && st.autonomy.val < 25 && st.emotional.val < 30);
+    check('depression',
+      st.social.val < 20 && st.creative.val < 20 && st.purpose.val < 20);
+
+    const recent = S.misinfoEvents.filter(t => Date.now() - t < 7*24*60*60*1000);
+    if (recent.length > 10) { il.cognitive_distortion.triggered = true; }
+  },
+
+  // Call when ready to surface an illness publicly
+  reveal(key) {
+    if (S.illnesses[key]) {
+      S.illnesses[key].revealed = true;
+      S.illnesses[key].active   = true;
+    }
+  },
+
+  // Stability: requires spread over days + multiple unique contributors
+  // No single donor can max this out — mirrors real stability
+  updateStability(donorId) {
+    const today = new Date().toISOString().split('T')[0];
+    if (!S.contributorDays[today]) S.contributorDays[today] = new Set();
+    S.contributorDays[today].add(donorId);
+
+    const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+    const recentDays = Object.keys(S.contributorDays).filter(d => d >= sevenDaysAgo);
+    const spread = recentDays.length / 7; // 0–1
+    const uniqueContribs = recentDays.reduce((sum, d) => sum + S.contributorDays[d].size, 0);
+
+    S.stats.stability.val = Math.min(100, Math.round(uniqueContribs * 5 * spread));
+  },
+};
+
+// ── EGG CANVAS ────────────────────────────────────────
+const eggC  = document.getElementById('eggCanvas');
+const eCtx  = eggC.getContext('2d');
+eCtx.imageSmoothingEnabled = false;
+const crackC = document.getElementById('crackCanvas');
+const crCtx  = crackC.getContext('2d');
+crCtx.imageSmoothingEnabled = false;
+
+const EP = {
+  _:null, BG:'#090912',
+  W:'#e8e4d8', Ws:'#c8c4b4', Wh:'#f4f0e8', Sp:'#b8b4a8',
+  G1:'#b8d8c0', G2:'#a0c8a8', // warm-green tints at high progress
+};
+
+// 48x48 canvas, 16x16 sprite at scale 3, centered
+const EGG = [
+  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+  '_','_','_','_','_','Ws','W','W','Ws','_','_','_','_','_','_','_',
+  '_','_','_','_','Ws','W','Wh','W','W','Ws','_','_','_','_','_','_',
+  '_','_','_','Ws','W','W','Wh','Wh','W','W','Ws','_','_','_','_','_',
+  '_','_','_','W','W','W','W','W','W','W','W','_','_','_','_','_',
+  '_','_','Ws','W','W','Sp','W','W','W','Sp','W','Ws','_','_','_','_',
+  '_','_','W','W','W','W','W','W','W','W','W','W','_','_','_','_',
+  '_','_','W','W','Sp','W','W','W','Sp','W','W','W','_','_','_','_',
+  '_','_','W','W','W','W','W','W','W','W','W','W','_','_','_','_',
+  '_','_','Ws','W','W','W','Sp','W','W','W','W','Ws','_','_','_','_',
+  '_','_','_','Ws','W','W','W','W','W','W','Ws','_','_','_','_','_',
+  '_','_','_','_','Ws','W','W','W','W','Ws','_','_','_','_','_','_',
+  '_','_','_','_','_','Ws','Ws','Ws','Ws','_','_','_','_','_','_','_',
+  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+];
+
+// Crack line segments (sprite coords → scaled up for crack canvas)
+const CRACK_LINES = [
+  [[7,5],[8,6],[8,7],[7,8],[6,9]],
+  [[8,6],[9,6],[10,7],[10,8]],
+  [[7,8],[7,9],[6,10],[6,11]],
+];
+
+let eggBob = 0, eggBobDir = 1;
+
+function drawEgg() {
+  const pct = Math.min(1, S.raised / S.goal);
+  eCtx.fillStyle = EP.BG;
+  eCtx.fillRect(0, 0, 48, 48);
+
+  // Bob speed increases with warmth
+  eggBob += eggBobDir * (0.004 + pct * 0.02);
+  if (eggBob > 1) eggBobDir = -1;
+  if (eggBob < 0) eggBobDir = 1;
+
+  // Wobble x at high warmth
+  const wobX = pct > .6 ? Math.round(Math.sin(Date.now() / 100) * (pct > .85 ? 2 : 1)) : 0;
+  const bobY  = Math.round(eggBob);
+
+  EGG.forEach((k, i) => {
+    if (!EP[k]) return;
+    let col = EP[k];
+    // Warm tint at high progress
+    if (pct > .5 && k === 'W')  col = EP.G1;
+    if (pct > .7 && k === 'Wh') col = EP.G2;
+    eCtx.fillStyle = col;
+    const x = (i % 16) * 3 + wobX;
+    const y = Math.floor(i / 16) * 3 + bobY;
+    eCtx.fillRect(x, y, 3, 3);
+  });
+
+  // Glow halo
+  if (pct > .15) {
+    eCtx.save();
+    const gr = eCtx.createRadialGradient(24,24,6,24,24,26);
+    const a = Math.min(.55, (pct-.15) * .7);
+    gr.addColorStop(0, `rgba(168,216,168,${a})`);
+    gr.addColorStop(1, 'rgba(168,216,168,0)');
+    eCtx.globalCompositeOperation = 'screen';
+    eCtx.fillStyle = gr;
+    eCtx.fillRect(0,0,48,48);
+    eCtx.restore();
+  }
+
+  // Cracks (drawn on overlay canvas)
+  if (pct > .5) {
+    crackC.style.opacity = String(Math.min(1, (pct-.5)*2.5));
+    crCtx.clearRect(0,0,48,48);
+    const numC = pct > .85 ? 3 : pct > .7 ? 2 : 1;
+    crCtx.strokeStyle = 'rgba(50,30,10,.9)';
+    crCtx.lineWidth = 1;
+    for (let c = 0; c < numC; c++) {
+      const pts = CRACK_LINES[c];
+      crCtx.beginPath();
+      crCtx.moveTo(pts[0][0]*3+1, pts[0][1]*3+1);
+      for (let p = 1; p < pts.length; p++) {
+        crCtx.lineTo(pts[p][0]*3+1, pts[p][1]*3+1);
+      }
+      crCtx.stroke();
+    }
+  }
+
+  // Heartbeat shake near hatch
+  if (pct > .85) {
+    const beat = 1 + Math.max(0, Math.sin(Date.now()/200)) * .025;
+    eggC.style.transform = `scale(${beat})`;
+  }
+
+  requestAnimationFrame(drawEgg);
+}
+drawEgg();
+
+// ── STATS PREVIEW ─────────────────────────────────────
+function renderStatsPreview() {
+  const c = document.getElementById('stats-preview');
+  c.innerHTML = '';
+  const preview = [
+    { key:'food',      known:true  },
+    { key:'sleep',     known:true  },
+    { key:'emotional', known:true  },
+    { key:'social',    known:false, hint:'???'  },
+    { key:'stability', known:false, hint:'???'  },
+    { key:'_hidden',   known:false, hint:'she\'ll show us' },
+  ];
+  preview.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'stat-card' + (p.known ? '' : ' locked');
+    if (p.known) {
+      const st = S.stats[p.key];
+      div.innerHTML = `
+        <div class="stat-card-name" style="color:${st.color}">${st.label}</div>
+        <div class="stat-bar-wrap">
+          <div class="stat-bar-fill" style="background:${st.fill};width:${st.val}%"></div>
+        </div>
+        <div class="stat-desc">${st.desc}</div>
+      `;
+    }
+    c.appendChild(div);
+  });
+}
+renderStatsPreview();
+
+// ── ROADMAP ───────────────────────────────────────────
+const STAGES = [
+  { active:true,  done:false, label:'01 — EGG',     desc:'she is here. the community warms her.',
+    known:['WARMTH'], hidden:['???','???'] },
+  { active:false, done:false, label:'02 — INFANT',   desc:'she hatches. food and sleep are everything.',
+    known:['FOOD','SLEEP'], hidden:['EMOTIONAL','???'] },
+  { active:false, done:false, label:'03 — TODDLER',  desc:'she moves. she feels things deeply.',
+    known:['FOOD','SLEEP','EMOTIONAL'], hidden:['SOCIAL','???'] },
+  { active:false, done:false, label:'04 — CHILD',    desc:'she\'s curious. she wants to belong.',
+    known:['FOOD','SLEEP','EMOTIONAL','SOCIAL'], hidden:['???','???'] },
+  { active:false, done:false, label:'05 — PRETEEN',  desc:'she\'s figuring out who she is.',
+    known:['???'], hidden:['???','???','???'] },
+  { active:false, done:false, label:'06 — TEEN',     desc:'identity. autonomy. it gets complicated.',
+    known:['???'], hidden:['???'] },
+];
+
+function renderRoadmap() {
+  const c = document.getElementById('roadmap');
+  c.innerHTML = '';
+  STAGES.forEach(st => {
+    const d = document.createElement('div');
+    d.className = 'road-item';
+    const tags = [
+      ...st.known.map(n => `<span class="need-tag ${n==='???' ? 'hidden':'known'}">${n}</span>`),
+      ...st.hidden.map(n => `<span class="need-tag hidden">${n}</span>`),
+    ].join('');
+    d.innerHTML = `
+      <div class="road-dot ${st.active?'active':st.done?'done':''}"></div>
+      <div>
+        <div class="road-stage">${st.label}</div>
+        <div class="road-desc">${st.desc}</div>
+        <div class="road-needs">${tags}</div>
+      </div>
+    `;
+    c.appendChild(d);
+  });
+}
+renderRoadmap();
+
+// ── DONATE ────────────────────────────────────────────
+function setAmt(n) { document.getElementById('donate-amt').value = n; }
+
+function donate() {
+  const raw = parseFloat(document.getElementById('donate-amt').value);
+  if (!raw || raw < 0.5) { showToast('ENTER A VALID AMOUNT', false); return; }
+  const amount = Math.round(raw * 100) / 100;
+
+  S.raised  = Math.min(S.goal, S.raised + amount);
+  S.warmers++;
+  S.donorCounter++;
+
+  const donorId = 'donor_' + S.donorCounter;
+  illnessSystem.updateStability(donorId);
+
+  const pct = S.raised / S.goal;
+  document.getElementById('prog-pct').textContent    = Math.round(pct * 100);
+  document.getElementById('prog-raised').textContent = '$' + S.raised.toFixed(2);
+  document.getElementById('prog-fill').style.width   = (pct * 100) + '%';
+  document.getElementById('cause-fill').style.width  = (pct * 100) + '%';
+  document.getElementById('warmer-count').textContent = S.warmers;
+
+  const rem = (S.goal - S.raised).toFixed(2);
+  document.getElementById('prog-text').textContent =
+    pct >= 1   ? '★ hatching! ★' :
+    pct > .8   ? `almost there — $${rem} to go` :
+    pct > .5   ? `she can feel the warmth — $${rem} to go` :
+                 `raise $${rem} more to hatch the egg`;
+
+  addFeed('anonymous', amount, `egg is ${Math.round(pct*100)}% warm 🥚`);
+  spawnFloat(`+${Math.round(amount*2)}% warmth`);
+  showToast('THE EGG GROWS WARMER ♡', true);
+
+  if (pct >= 1 && !S.hatched && !S.hatchingCountdown) {
+    S.hatchingCountdown = true;
+    document.getElementById('countdown').style.display = 'block';
+    startHatchCountdown();
+  }
+
+  renderStatsPreview();
+  illnessSystem.check();
+  document.getElementById('donate-amt').value = '';
+}
+
+function startHatchCountdown() {
+  let n = 5;
+  document.getElementById('cd-num').textContent = n;
+  const iv = setInterval(() => {
+    n--;
+    document.getElementById('cd-num').textContent = n;
+    if (n <= 0) { clearInterval(iv); hatch(); }
+  }, 1000);
+}
+
+function hatch() {
+  S.hatched = true;
+  S.stage   = 'infant';
+  S.stats.food.visible  = true;
+  S.stats.sleep.visible = true;
+
+  // Add hatch story post
+  const posts = document.getElementById('story-posts');
+  const p = document.createElement('div');
+  p.className = 'story-post';
+  p.innerHTML = `
+    <div class="story-date">HATCH DAY</div>
+    <div class="story-title">she's here. ★</div>
+    <div class="story-body">
+      the community did it. the egg cracked open.<br><br>
+      she's small. she's loud. she doesn't know what she needs yet —
+      but she's real, and she's here, and she's ours to care for.<br><br>
+      <span style="color:var(--food-c)">FOOD</span> and
+      <span style="color:var(--sleep-c)">SLEEP</span> are everything right now.
+      but watch her closely. she'll show us more.
+    </div>
+  `;
+  posts.insertBefore(p, posts.firstChild);
+
+  STAGES[0].done   = true;
+  STAGES[0].active = false;
+  STAGES[1].active = true;
+
+  renderStatsPreview();
+  renderRoadmap();
+  addFeed('SAMA', 0, '...she\'s here 🐣');
+  showToast('★ SAMA HAS HATCHED ★', true);
+}
+
+// ── FEED ──────────────────────────────────────────────
+function addFeed(who, amt, msg) {
+  const feed = document.getElementById('feed');
+  const t    = new Date();
+  const time = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+  const div  = document.createElement('div');
+  div.className = 'feed-item';
+  const amtStr = amt > 0 ? ` <span style="color:var(--yellow)">$${amt.toFixed(2)}</span>` : '';
+  div.innerHTML = `<span class="ft">[${time}]</span> <strong>${who}</strong>${amtStr} — <span class="fp">${msg}</span>`;
+  feed.insertBefore(div, feed.firstChild);
+  if (feed.children.length > 40) feed.removeChild(feed.lastChild);
+}
+
+const seedFeed = [
+  ['warmheart',  .50, 'sending warmth 🌿'],
+  ['anon',       1,   'egg looks bigger today?'],
+  ['pixelcare',  3,   'she\'s going to be ok'],
+  ['earthling',  5,   'can\'t wait to meet her ♡'],
+  ['quietsoul',  2,   'here for her'],
+];
+setTimeout(() => {
+  seedFeed.forEach(([who, amt, msg], i) => {
+    setTimeout(() => addFeed(who, amt, msg), i * 350);
+  });
+}, 400);
+
+// ── TOAST ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, good=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = good ? 'show' : 'show warn';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3200);
+}
+
+// ── FLOAT ─────────────────────────────────────────────
+function spawnFloat(text) {
+  const el = document.createElement('div');
+  el.className  = 'float-pt';
+  el.textContent = text;
+  el.style.left = (25 + Math.random() * 50) + 'vw';
+  el.style.top  = '55vh';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+</script>
+</body>
+</html>
