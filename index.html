@@ -542,6 +542,7 @@ function drawEgg() {
   // Cracks (drawn on overlay canvas)
   if (pct > .5) {
     crackC.style.opacity = String(Math.min(1, (pct-.5)*2.5));
+    crackC.style.transform = `translate(${wobX}px, ${bobY}px)`;
     crCtx.clearRect(0,0,48,48);
     const numC = pct > .85 ? 3 : pct > .7 ? 2 : 1;
     crCtx.strokeStyle = 'rgba(50,30,10,.9)';
