@@ -216,8 +216,7 @@ footer a:hover{text-decoration:underline}
       <div class="pulse-ring"></div>
       <div class="pulse-ring"></div>
       <canvas id="eggCanvas" width="48" height="48"></canvas>
-      <canvas id="crackCanvas" width="48" height="48"
-        style="position:absolute;top:20px;left:20px;width:240px;height:240px;pointer-events:none;image-rendering:pixelated;opacity:0;transition:opacity .5s"></canvas>
+
     </div>
     <div class="egg-caption">
       <span class="hl">something is here.</span><br>
@@ -458,20 +457,16 @@ const illnessSystem = {
 };
 
 // ── EGG CANVAS ────────────────────────────────────────
-const eggC  = document.getElementById('eggCanvas');
-const eCtx  = eggC.getContext('2d');
+const eggC = document.getElementById('eggCanvas');
+const eCtx = eggC.getContext('2d');
 eCtx.imageSmoothingEnabled = false;
-const crackC = document.getElementById('crackCanvas');
-const crCtx  = crackC.getContext('2d');
-crCtx.imageSmoothingEnabled = false;
 
 const EP = {
   _:null, BG:'#090912',
   W:'#e8e4d8', Ws:'#c8c4b4', Wh:'#f4f0e8', Sp:'#b8b4a8',
-  G1:'#b8d8c0', G2:'#a0c8a8', // warm-green tints at high progress
+  G1:'#b8d8c0', G2:'#a0c8a8',
 };
 
-// 48x48 canvas, 16x16 sprite at scale 3, centered
 const EGG = [
   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
   '_','_','_','_','_','Ws','W','W','Ws','_','_','_','_','_','_','_',
@@ -491,7 +486,7 @@ const EGG = [
   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
 ];
 
-// Crack line segments (sprite coords → scaled up for crack canvas)
+// Cracks drawn directly on egg canvas, relative to egg's own coordinate space
 const CRACK_LINES = [
   [[7,5],[8,6],[8,7],[7,8],[6,9]],
   [[8,6],[9,6],[10,7],[10,8]],
@@ -499,38 +494,70 @@ const CRACK_LINES = [
 ];
 
 let eggBob = 0, eggBobDir = 1;
+let hatchBurst = null; // { t: 0, particles: [] }
 
 function drawEgg() {
+  if (S.hatched && !hatchBurst) {
+    requestAnimationFrame(drawEgg);
+    return;
+  }
+
   const pct = Math.min(1, S.raised / S.goal);
   eCtx.fillStyle = EP.BG;
   eCtx.fillRect(0, 0, 48, 48);
 
-  // Bob speed increases with warmth
+  // ── Hatch burst animation ──
+  if (hatchBurst) {
+    drawHatchBurst();
+    requestAnimationFrame(drawEgg);
+    return;
+  }
+
+  // ── Normal egg animation ──
   eggBob += eggBobDir * (0.004 + pct * 0.02);
   if (eggBob > 1) eggBobDir = -1;
   if (eggBob < 0) eggBobDir = 1;
 
-  // Wobble x at high warmth
   const wobX = pct > .6 ? Math.round(Math.sin(Date.now() / 100) * (pct > .85 ? 2 : 1)) : 0;
-  const bobY  = Math.round(eggBob);
+  const bobY = Math.round(eggBob);
+
+  // Draw egg sprite — cracks and egg share the same transform (bobY, wobX)
+  eCtx.save();
+  eCtx.translate(wobX, bobY);
 
   EGG.forEach((k, i) => {
     if (!EP[k]) return;
     let col = EP[k];
-    // Warm tint at high progress
     if (pct > .5 && k === 'W')  col = EP.G1;
     if (pct > .7 && k === 'Wh') col = EP.G2;
     eCtx.fillStyle = col;
-    const x = (i % 16) * 3 + wobX;
-    const y = Math.floor(i / 16) * 3 + bobY;
-    eCtx.fillRect(x, y, 3, 3);
+    eCtx.fillRect((i % 16) * 3, Math.floor(i / 16) * 3, 3, 3);
   });
 
-  // Glow halo
+  // Draw cracks on same layer — perfectly attached
+  if (pct > .5) {
+    const crackAlpha = Math.min(1, (pct - .5) * 2.5);
+    eCtx.strokeStyle = `rgba(50,30,10,${crackAlpha})`;
+    eCtx.lineWidth = 1;
+    const numC = pct > .85 ? 3 : pct > .7 ? 2 : 1;
+    for (let c = 0; c < numC; c++) {
+      const pts = CRACK_LINES[c];
+      eCtx.beginPath();
+      eCtx.moveTo(pts[0][0]*3+1, pts[0][1]*3+1);
+      for (let p = 1; p < pts.length; p++) {
+        eCtx.lineTo(pts[p][0]*3+1, pts[p][1]*3+1);
+      }
+      eCtx.stroke();
+    }
+  }
+
+  eCtx.restore();
+
+  // Glow halo (outside transform so it stays centred)
   if (pct > .15) {
     eCtx.save();
     const gr = eCtx.createRadialGradient(24,24,6,24,24,26);
-    const a = Math.min(.55, (pct-.15) * .7);
+    const a = Math.min(.55, (pct - .15) * .7);
     gr.addColorStop(0, `rgba(168,216,168,${a})`);
     gr.addColorStop(1, 'rgba(168,216,168,0)');
     eCtx.globalCompositeOperation = 'screen';
@@ -539,26 +566,7 @@ function drawEgg() {
     eCtx.restore();
   }
 
-  // Cracks (drawn on overlay canvas)
-  if (pct > .5) {
-    crackC.style.opacity = String(Math.min(1, (pct-.5)*2.5));
-    crackC.style.transform = `translate(${wobX}px, ${bobY}px)`;
-    crCtx.clearRect(0,0,48,48);
-    const numC = pct > .85 ? 3 : pct > .7 ? 2 : 1;
-    crCtx.strokeStyle = 'rgba(50,30,10,.9)';
-    crCtx.lineWidth = 1;
-    for (let c = 0; c < numC; c++) {
-      const pts = CRACK_LINES[c];
-      crCtx.beginPath();
-      crCtx.moveTo(pts[0][0]*3+1, pts[0][1]*3+1);
-      for (let p = 1; p < pts.length; p++) {
-        crCtx.lineTo(pts[p][0]*3+1, pts[p][1]*3+1);
-      }
-      crCtx.stroke();
-    }
-  }
-
-  // Heartbeat shake near hatch
+  // Heartbeat scale near hatch
   if (pct > .85) {
     const beat = 1 + Math.max(0, Math.sin(Date.now()/200)) * .025;
     eggC.style.transform = `scale(${beat})`;
@@ -567,6 +575,144 @@ function drawEgg() {
   requestAnimationFrame(drawEgg);
 }
 drawEgg();
+
+// ── HATCH BURST ───────────────────────────────────────
+// Shell splits into top cap and bottom half, drifting apart
+// Top cap tumbles upward, bottom half falls away
+// Soft warm light spills from the gap
+
+// ── SHELL SPLIT — pixels partitioned by crack line ────
+// Crack runs roughly from (7,5) down through (7,8)→(6,11)
+// "Above crack" = top cap, "below crack" = bottom piece
+// We use a simple boundary: pixels where row < crackRowAt(col)
+function crackRowAt(col) {
+  // Approximate the main crack diagonal in sprite coords
+  if (col <= 6)  return 9;
+  if (col <= 7)  return 7;
+  if (col <= 8)  return 6;
+  return 99; // everything else is bottom
+}
+
+const SHELL_TOP    = [];
+const SHELL_BOTTOM = [];
+
+EGG.forEach((k, i) => {
+  if (!EP[k]) return;
+  const row = Math.floor(i / 16);
+  const col = i % 16;
+  const px  = { x: col * 3, y: row * 3, col: EP[k] };
+  if (row < crackRowAt(col)) SHELL_TOP.push(px);
+  else                        SHELL_BOTTOM.push(px);
+});
+
+// Draw a shell piece with a 1px dark shadow outline
+function drawShellPiece(pixels, offsetX, offsetY, rot, pivotX, pivotY, alpha) {
+  eCtx.save();
+  eCtx.globalAlpha = alpha;
+  eCtx.translate(pivotX + offsetX, pivotY + offsetY);
+  eCtx.rotate(rot);
+  eCtx.translate(-pivotX, -pivotY);
+
+  // Shadow outline — draw pixels offset by 1px in 4 directions in dark colour
+  const shadow = 'rgba(0,0,0,0.35)';
+  const offsets = [[1,0],[-1,0],[0,1],[0,-1]];
+  pixels.forEach(p => {
+    eCtx.fillStyle = shadow;
+    offsets.forEach(([dx,dy]) =>
+      eCtx.fillRect(p.x + dx, p.y + dy, 3, 3)
+    );
+  });
+  // Draw actual pixels on top
+  pixels.forEach(p => {
+    eCtx.fillStyle = p.col;
+    eCtx.fillRect(p.x, p.y, 3, 3);
+  });
+
+  eCtx.restore();
+}
+
+function triggerHatchBurst() {
+  // Crack origin is around sprite pixel (7,6) = canvas (21,18)
+  hatchBurst = {
+    t: 0,
+    // Top cap peels away upward, pivoting from crack origin, tilting left
+    top: { x:0, y:0, rot:0, vx:-0.15, vy:-0.5, vrot:-0.03, vy_gravity:0.01, alpha:1, pivX:21, pivY:18 },
+    // Bottom piece drops down and right, pivoting from crack origin
+    bot: { x:0, y:0, rot:0, vx:0.1,  vy:0.4,  vrot:0.025, vy_gravity:0.035, alpha:1, pivX:21, pivY:18 },
+    // Tiny light motes from crack seam
+    motes: Array.from({length:8}, () => ({
+      x: 18 + Math.random() * 8,
+      y: 16 + Math.random() * 8,
+      vx: (Math.random() - .5) * 0.5,
+      vy: -0.6 - Math.random() * 0.4,
+      alpha: 1,
+      col: ['#f4f0e8','#c8f0c8','#ffffff','#a8d8a8'][Math.floor(Math.random()*4)],
+    })),
+  };
+  eggC.style.transform = 'scale(1)';
+}
+
+function drawHatchBurst() {
+  const b = hatchBurst;
+  b.t += 0.022;
+  const t = b.t;
+
+  eCtx.fillStyle = EP.BG;
+  eCtx.fillRect(0, 0, 48, 48);
+
+  // Soft warm glow growing from crack origin
+  eCtx.save();
+  const glowR = Math.min(32, 4 + t * 50);
+  const glowA = Math.min(0.85, t * 1.8);
+  const gr = eCtx.createRadialGradient(21, 20, 0, 21, 20, glowR);
+  gr.addColorStop(0,   `rgba(210,255,210,${glowA})`);
+  gr.addColorStop(0.5, `rgba(168,216,168,${glowA * 0.5})`);
+  gr.addColorStop(1,   'rgba(168,216,168,0)');
+  eCtx.globalCompositeOperation = 'screen';
+  eCtx.fillStyle = gr;
+  eCtx.fillRect(0, 0, 48, 48);
+  eCtx.restore();
+
+  // Top cap — peels up and away, fades after delay
+  const top = b.top;
+  top.x   += top.vx;
+  top.y   += top.vy;
+  top.vy  += top.vy_gravity;
+  top.rot += top.vrot;
+  top.alpha = Math.max(0, 1 - Math.max(0, t - 0.7) * 1.8);
+  if (top.alpha > 0)
+    drawShellPiece(SHELL_TOP, top.x, top.y, top.rot, top.pivX, top.pivY, top.alpha);
+
+  // Bottom piece — drops down with gravity, fades
+  const bot = b.bot;
+  bot.x   += bot.vx;
+  bot.y   += bot.vy;
+  bot.vy  += bot.vy_gravity;
+  bot.rot += bot.vrot;
+  bot.alpha = Math.max(0, 1 - Math.max(0, t - 0.55) * 1.6);
+  if (bot.alpha > 0)
+    drawShellPiece(SHELL_BOTTOM, bot.x, bot.y, bot.rot, bot.pivX, bot.pivY, bot.alpha);
+
+  // Light motes rising from seam
+  b.motes.forEach(m => {
+    m.x += m.vx;
+    m.y += m.vy;
+    m.vy += 0.01; // slight float resistance
+    m.alpha = Math.max(0, 1 - t * 1.4);
+    if (m.alpha <= 0) return;
+    eCtx.globalAlpha = m.alpha;
+    eCtx.fillStyle = m.col;
+    eCtx.fillRect(Math.round(m.x), Math.round(m.y), 2, 2);
+  });
+
+  eCtx.globalAlpha = 1;
+
+  if (t > 2.0) {
+    hatchBurst = null;
+    eCtx.fillStyle = EP.BG;
+    eCtx.fillRect(0, 0, 48, 48);
+  }
+}
 
 // ── STATS PREVIEW ─────────────────────────────────────
 function renderStatsPreview() {
@@ -696,6 +842,9 @@ function hatch() {
   S.stage   = 'infant';
   S.stats.food.visible  = true;
   S.stats.sleep.visible = true;
+
+  // Trigger burst animation
+  triggerHatchBurst();
 
   // Add hatch story post
   const posts = document.getElementById('story-posts');
