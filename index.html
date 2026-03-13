@@ -157,7 +157,7 @@ footer a:hover{color:var(--accent)}
 <header>
   <div class="logo">Samagotchi</div>
   <div class="sub-logo">a community-raised being</div>
-  <div class="tagline">something is here. it needs care.</div>
+  <div class="tagline">Something is here. It needs care.</div>
 </header>
 
 <!-- EGG -->
@@ -248,9 +248,9 @@ footer a:hover{color:var(--accent)}
     </div>
 
     <div class="egg-caption">
-      an egg.<br>
-      unknown origin. unknown contents.<br>
-      it needs <span class="hl">warmth</span>. it needs <span class="hl">shelter</span>.
+      An egg.<br>
+      Unknown origin. Unknown contents.<br>
+      It needs <span class="hl">warmth</span>. It needs <span class="hl">shelter</span>.
     </div>
 
     <div class="hatch-progress">
@@ -273,7 +273,7 @@ footer a:hover{color:var(--accent)}
 <div class="panel" style="margin-top:12px">
   <div class="ptitle">Observed Needs</div>
   <p style="font-size:14px;color:var(--dim2);line-height:1.8;margin-bottom:16px">
-    Needs are revealed as she grows. Each one maps to a real cause.
+    Needs are revealed as it grows. Each one maps to a real cause.
   </p>
   <div class="stats-preview" id="stats-preview"></div>
 </div>
@@ -351,11 +351,11 @@ footer a:hover{color:var(--accent)}
     <div id="story-posts">
       <div class="story-post">
         <div class="story-date">Entry 001</div>
-        <div class="story-title">there's an egg.</div>
+        <div class="story-title">There's an egg.</div>
         <div class="story-body">
-          unknown origin. unknown contents.<br><br>
-          it is here. it is warm to the touch.<br><br>
-          we are going to find out what it needs.
+          Unknown origin. Unknown contents.<br><br>
+          It is here. It is warm to the touch.<br><br>
+          We are going to find out what it needs.
         </div>
       </div>
     </div>
@@ -406,15 +406,17 @@ const S = {
   // All stats seeded — only visible ones shown to community
   // visible flag flips as Sama grows
   stats: {
-    food:      { val:0, visible:false, label:'FOOD',      color:'var(--food-c)',   fill:'#e8a060', desc:'smoothies → food bank · $2.50/day' },
-    sleep:     { val:0, visible:false, label:'SLEEP',     color:'var(--sleep-c)',  fill:'#a080d8', desc:'rest, rhythm, safety at night' },
-    emotional: { val:0, visible:false, label:'EMOTIONAL', color:'var(--emo-c)',    fill:'#e080a0', desc:'loved, secure, seen' },
-    social:    { val:0, visible:false, label:'SOCIAL',    color:'var(--social-c)', fill:'#60a0e8', desc:'belonging, friendship, connection' },
-    stability: { val:0, visible:false, label:'STABILITY', color:'var(--stab-c)',   fill:'#90c8a0', desc:'consistency from the community over time' },
-    cognitive: { val:0, visible:false, label:'COGNITIVE', color:'#54a0ff',         fill:'#54a0ff', desc:'curiosity, learning, real facts' },
-    creative:  { val:0, visible:false, label:'CREATIVE',  color:'#e090c8',         fill:'#e090c8', desc:'expression, play, making things' },
-    purpose:   { val:0, visible:false, label:'PURPOSE',   color:'#a8d8a8',         fill:'#a8d8a8', desc:'garden project · meaning, contribution' },
-    autonomy:  { val:0, visible:false, label:'AUTONOMY',  color:'#f5d06a',         fill:'#f5d06a', desc:'agency, choices, voice' },
+    warmth:    { val:0, visible:true,  label:'WARMTH',   color:'var(--warm)',    fill:'#c8956e', desc:'disaster relief · Direct Relief' },
+    shelter:   { val:0, visible:true,  label:'SHELTER',  color:'var(--shelter)', fill:'#6e8ea8', desc:'displacement · UNHCR' },
+    food:      { val:0, visible:false, label:'FOOD',      color:'var(--food-c)',   fill:'#c8956e', desc:'—' },
+    sleep:     { val:0, visible:false, label:'SLEEP',     color:'var(--sleep-c)',  fill:'#7a88b8', desc:'—' },
+    emotional: { val:0, visible:false, label:'EMOTIONAL', color:'var(--emo-c)',    fill:'#b87a8e', desc:'—' },
+    social:    { val:0, visible:false, label:'SOCIAL',    color:'var(--social-c)', fill:'#6e98b8', desc:'—' },
+    stability: { val:0, visible:false, label:'STABILITY', color:'var(--stab-c)',   fill:'#7a9e6e', desc:'—' },
+    cognitive: { val:0, visible:false, label:'COGNITIVE', color:'var(--accent)',   fill:'#7a9e6e', desc:'—' },
+    creative:  { val:0, visible:false, label:'CREATIVE',  color:'var(--sand)',     fill:'#c8b882', desc:'—' },
+    purpose:   { val:0, visible:false, label:'PURPOSE',   color:'var(--glow)',     fill:'#a0bf8e', desc:'—' },
+    autonomy:  { val:0, visible:false, label:'AUTONOMY',  color:'var(--sand)',     fill:'#c8b882', desc:'—' },
   },
 
   // Stability tracking — unique contributor days
@@ -595,47 +597,37 @@ function triggerHatchBurst() {
 function renderStatsPreview() {
   const c = document.getElementById('stats-preview');
   c.innerHTML = '';
-  const preview = [
-    { key:'food',      known:true  },
-    { key:'sleep',     known:true  },
-    { key:'emotional', known:true  },
-    { key:'social',    known:false, hint:'???'  },
-    { key:'stability', known:false, hint:'???'  },
-    { key:'_hidden',   known:false, hint:'she\'ll show us' },
-  ];
-  preview.forEach(p => {
+  ['warmth', 'shelter'].forEach(key => {
+    const st = S.stats[key];
     const div = document.createElement('div');
-    div.className = 'stat-card' + (p.known ? '' : ' locked');
-    if (p.known) {
-      const st = S.stats[p.key];
-      div.innerHTML = `
-        <div class="stat-card-name" style="color:${st.color}">${st.label}</div>
-        <div class="stat-bar-wrap">
-          <div class="stat-bar-fill" style="background:${st.fill};width:${st.val}%"></div>
-        </div>
-        <div class="stat-desc">${st.desc}</div>
-      `;
-    }
+    div.className = 'stat-card';
+    div.innerHTML = `
+      <div class="stat-card-name" style="color:${st.color}">${st.label}</div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar-fill" style="background:${st.fill};width:${st.val}%"></div>
+      </div>
+      <div class="stat-desc">${st.desc}</div>
+    `;
     c.appendChild(div);
   });
 }
 renderStatsPreview();
 
 // ── ROADMAP ───────────────────────────────────────────
+// Only completed and current stages are shown.
+// Future stages are not listed — they reveal as it grows.
 const STAGES = [
-  { active:true,  done:false, label:'01 — EGG',     desc:'she is here. the community warms her.',
-    known:['WARMTH'], hidden:['???','???'] },
-  { active:false, done:false, label:'02 — INFANT',   desc:'she hatches. food and sleep are everything.',
-    known:['FOOD','SLEEP'], hidden:['EMOTIONAL','???'] },
-  { active:false, done:false, label:'03 — TODDLER',  desc:'she moves. she feels things deeply.',
-    known:['FOOD','SLEEP','EMOTIONAL'], hidden:['SOCIAL','???'] },
-  { active:false, done:false, label:'04 — CHILD',    desc:'she\'s curious. she wants to belong.',
-    known:['FOOD','SLEEP','EMOTIONAL','SOCIAL'], hidden:['???','???'] },
-  { active:false, done:false, label:'05 — PRETEEN',  desc:'she\'s figuring out who she is.',
-    known:['???'], hidden:['???','???','???'] },
-  { active:false, done:false, label:'06 — TEEN',     desc:'identity. autonomy. it gets complicated.',
-    known:['???'], hidden:['???'] },
+  { id:'egg',    label:'Stage I — Egg',    desc:'An egg. Unknown origin. The community keeps it warm.',
+    needs:['WARMTH','SHELTER'], active:true, done:false },
 ];
+
+// When Sama hatches, call: unlockStage('infant', 'Stage II — Infant', 'it hatched.', ['FOOD','SLEEP'])
+function unlockStage(id, label, desc, needs) {
+  STAGES[STAGES.length - 1].active = false;
+  STAGES[STAGES.length - 1].done   = true;
+  STAGES.push({ id, label, desc, needs, active:true, done:false });
+  renderRoadmap();
+}
 
 function renderRoadmap() {
   const c = document.getElementById('roadmap');
@@ -643,12 +635,11 @@ function renderRoadmap() {
   STAGES.forEach(st => {
     const d = document.createElement('div');
     d.className = 'road-item';
-    const tags = [
-      ...st.known.map(n => `<span class="need-tag ${n==='???' ? 'hidden':'known'}">${n}</span>`),
-      ...st.hidden.map(n => `<span class="need-tag hidden">${n}</span>`),
-    ].join('');
+    const tags = st.needs.map(n =>
+      `<span class="need-tag known">${n}</span>`
+    ).join('');
     d.innerHTML = `
-      <div class="road-dot ${st.active?'active':st.done?'done':''}"></div>
+      <div class="road-dot ${st.active ? 'active' : 'done'}"></div>
       <div>
         <div class="road-stage">${st.label}</div>
         <div class="road-desc">${st.desc}</div>
@@ -682,6 +673,10 @@ function donate() {
   const inlineRaised = document.getElementById('prog-raised-inline');
   if (inlineRaised) inlineRaised.textContent = '$' + S.raised.toFixed(2);
   document.getElementById('warmer-count').textContent = S.warmers;
+
+  // Update warmth + shelter bars proportionally to progress
+  S.stats.warmth.val  = Math.round(pct * 100);
+  S.stats.shelter.val = Math.round(pct * 100);
 
   const rem = (S.goal - S.raised).toFixed(2);
   document.getElementById('prog-text').textContent =
@@ -724,38 +719,28 @@ function startHatchCountdown() {
 function hatch() {
   S.hatched = true;
   S.stage   = 'infant';
-  S.stats.food.visible  = true;
-  S.stats.sleep.visible = true;
 
-  // Trigger burst animation
   triggerHatchBurst();
 
-  // Add hatch story post
   const posts = document.getElementById('story-posts');
   const p = document.createElement('div');
   p.className = 'story-post';
   p.innerHTML = `
-    <div class="story-date">HATCH DAY</div>
-    <div class="story-title">she's here. ★</div>
+    <div class="story-date">Hatch Day</div>
+    <div class="story-title">it's here.</div>
     <div class="story-body">
-      the community did it. the egg cracked open.<br><br>
-      she's small. she's loud. she doesn't know what she needs yet —
-      but she's real, and she's here, and she's ours to care for.<br><br>
-      <span style="color:var(--food-c)">FOOD</span> and
-      <span style="color:var(--sleep-c)">SLEEP</span> are everything right now.
-      but watch her closely. she'll show us more.
+      The egg cracked open.<br><br>
+      It's small. It doesn't know what it needs yet.<br><br>
+      We'll find out together.
     </div>
   `;
   posts.insertBefore(p, posts.firstChild);
 
-  STAGES[0].done   = true;
-  STAGES[0].active = false;
-  STAGES[1].active = true;
+  unlockStage('infant', 'Stage II — Infant', 'It hatched. It is here.', ['WARMTH','SHELTER']);
 
   renderStatsPreview();
-  renderRoadmap();
-  addFeed('SAMA', 0, '...she\'s here 🐣');
-  showToast('★ SAMA HAS HATCHED ★', true);
+  addFeed('—', 0, 'it hatched.');
+  showToast('it hatched.', true);
 }
 
 // ── FEED ──────────────────────────────────────────────
@@ -774,9 +759,9 @@ function addFeed(who, amt, msg) {
 const seedFeed = [
   ['warmheart',  .50, 'sending warmth 🌿'],
   ['anon',       1,   'egg looks bigger today?'],
-  ['pixelcare',  3,   'she\'s going to be ok'],
-  ['earthling',  5,   'can\'t wait to meet her ♡'],
-  ['quietsoul',  2,   'here for her'],
+  ['pixelcare',  3,   'it\'s going to be ok'],
+  ['earthling',  5,   'can\'t wait to meet it ♡'],
+  ['quietsoul',  2,   'here for it'],
 ];
 setTimeout(() => {
   seedFeed.forEach(([who, amt, msg], i) => {
