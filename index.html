@@ -5,192 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Samagotchi</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
-  --bg:       #0b0b0f;
-  --panel:    #111118;
-  --border:   #222233;
-  --border2:  #333355;
-  --pixel:    #e8e8f5;
-  --dim:      #44445a;
-  --dim2:     #7777a0;
-  --accent:   #a8d8a8;
-  --yellow:   #f5d06a;
-  --red:      #e07070;
-  --blue:     #7090e0;
-  --pink:     #e090b0;
-  --food-c:   #e8a060;
-  --sleep-c:  #a080d8;
-  --emo-c:    #e080a0;
-  --social-c: #60a0e8;
-  --stab-c:   #90c8a0;
+  --bg:       #1c1f1a;
+  --panel:    #232620;
+  --border:   #2e3229;
+  --border2:  #3a3f34;
+  --text:     #e8e4d8;
+  --dim:      #4a5044;
+  --dim2:     #7a8570;
+  --accent:   #7a9e6e;
+  --glow:     #a0bf8e;
+  --sand:     #c8b882;
+  --warm:     #c8956e;
+  --shelter:  #6e8ea8;
+  --food-c:   #c8956e;
+  --sleep-c:  #7a88b8;
+  --emo-c:    #b87a8e;
+  --social-c: #6e98b8;
+  --stab-c:   #7a9e6e;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  background:var(--bg);color:var(--pixel);
-  font-family:'VT323',monospace;font-size:18px;
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:16px;font-weight:300;
   min-height:100vh;overflow-x:hidden;
 }
-body::after{
-  content:'';pointer-events:none;position:fixed;inset:0;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);
-}
-.stars{position:fixed;inset:0;z-index:0;pointer-events:none}
-.star{position:absolute;background:#fff;border-radius:50%;opacity:0;animation:twinkle var(--d,3s) var(--dl,0s) infinite}
-@keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--b,.4)}}
-.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:24px 16px 80px}
+.wrap{position:relative;z-index:1;max-width:740px;margin:0 auto;padding:24px 20px 100px}
 
-header{text-align:center;padding:48px 0 28px}
+header{text-align:center;padding:64px 0 40px}
 .logo{
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(16px,4vw,32px);
-  color:var(--accent);
-  text-shadow:0 0 20px rgba(168,216,168,.5),0 0 40px rgba(168,216,168,.2);
-  animation:glow-pulse 4s ease-in-out infinite;
-  letter-spacing:3px;
+  font-family:'Space Mono',monospace;
+  font-size:clamp(16px,3.5vw,24px);letter-spacing:6px;
+  color:var(--glow);text-transform:uppercase;
 }
-@keyframes glow-pulse{
-  0%,100%{text-shadow:0 0 20px rgba(168,216,168,.5),0 0 40px rgba(168,216,168,.2)}
-  50%{text-shadow:0 0 30px rgba(168,216,168,.8),0 0 60px rgba(168,216,168,.4)}
-}
-.sub-logo{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim2);letter-spacing:2px;margin-top:10px}
-.tagline{font-size:19px;color:var(--dim2);margin-top:12px;line-height:1.6}
+.sub-logo{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim2);letter-spacing:4px;margin-top:10px;text-transform:uppercase}
+.tagline{font-size:16px;color:var(--dim2);margin-top:18px;line-height:2.2;font-weight:300}
 
-.panel{background:var(--panel);border:1px solid var(--border);padding:20px;position:relative}
-.panel::before{
-  content:'';position:absolute;top:0;left:16px;right:16px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.15;
-}
-.ptitle{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--accent);letter-spacing:1px;margin-bottom:16px}
+.panel{background:var(--panel);border:1px solid var(--border);padding:28px;position:relative}
+.panel+.panel, .panel+.two-col, .two-col+.panel{margin-top:12px}
+.ptitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim2);margin-bottom:20px}
 
-/* EGG */
-.egg-stage{display:flex;flex-direction:column;align-items:center;padding:32px 20px}
-canvas#eggCanvas{
-  display:block;image-rendering:pixelated;
-  border:1px solid var(--border2);background:#090912;
-  width:240px;height:240px;margin:0 auto;
-}
-.egg-caption{
-  font-family:'Press Start 2P',monospace;font-size:9px;
-  color:var(--dim2);text-align:center;margin-top:20px;line-height:2;
-}
-.egg-caption .hl{color:var(--accent)}
-.pulse-ring{
-  width:260px;height:260px;border-radius:50%;
-  border:2px solid rgba(168,216,168,.15);
-  position:absolute;animation:ring-pulse 3s ease-out infinite;
-}
-.pulse-ring:nth-child(2){animation-delay:1s;border-color:rgba(168,216,168,.08)}
-.pulse-ring:nth-child(3){animation-delay:2s;border-color:rgba(168,216,168,.04)}
-@keyframes ring-pulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.egg-stage{display:flex;flex-direction:column;align-items:center;padding:36px 20px 20px}
+.egg-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.egg-svg-container{width:280px;height:280px;position:relative}
+.egg-svg-container svg{width:100%;height:100%}
+.pulse-ring{width:300px;height:300px;border-radius:50%;border:1px solid rgba(120,160,100,.08);position:absolute;animation:ring-pulse 7s ease-out infinite}
+.pulse-ring:nth-child(2){animation-delay:2.3s;border-color:rgba(120,160,100,.05)}
+.pulse-ring:nth-child(3){animation-delay:4.6s;border-color:rgba(120,160,100,.03)}
+@keyframes ring-pulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.9);opacity:0}}
 
-.hatch-progress{width:100%;max-width:480px;margin-top:28px}
-.prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.prog-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--dim2)}
-.prog-val{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent)}
-.prog-bar{height:14px;background:#0a0a12;border:1px solid var(--border2);overflow:hidden;position:relative}
-.prog-fill{
-  height:100%;background:linear-gradient(90deg,var(--accent),#d0f0d0);
-  transition:width 1s cubic-bezier(.4,0,.2,1);
-}
-.prog-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:rgba(255,255,255,.2)}
-.prog-text{font-size:15px;color:var(--dim2);margin-top:6px;text-align:center}
-.countdown{
-  font-family:'Press Start 2P',monospace;font-size:clamp(10px,2vw,15px);
-  color:var(--yellow);text-align:center;letter-spacing:2px;margin-top:16px;
-}
-.countdown span{color:var(--accent)}
+.egg-caption{font-size:15px;color:var(--dim2);text-align:center;margin-top:28px;line-height:2.4;font-weight:300}
+.egg-caption .hl{color:var(--glow);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px}
 
-/* STATS PREVIEW */
+.hatch-progress{width:100%;max-width:380px;margin-top:32px}
+.prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.prog-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2)}
+.prog-val{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent)}
+.prog-bar{height:1px;background:var(--border2)}
+.prog-fill{height:1px;background:var(--glow);transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.prog-text{font-size:13px;color:var(--dim);margin-top:10px;text-align:center}
+.countdown{font-family:'Space Mono',monospace;font-size:13px;color:var(--sand);text-align:center;letter-spacing:4px;margin-top:20px}
+
 .stats-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.stat-card{background:#0a0a12;border:1px solid var(--border);padding:12px;position:relative;overflow:hidden}
-.stat-card.locked::after{
-  content:'?';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:'Press Start 2P',monospace;font-size:22px;color:var(--dim);
-  background:rgba(8,8,15,.88);
-}
-.stat-card-name{font-family:'Press Start 2P',monospace;font-size:6px;letter-spacing:1px;margin-bottom:8px}
-.stat-bar-wrap{height:8px;background:#060610;border:1px solid var(--border);overflow:hidden}
-.stat-bar-fill{height:100%;transition:width .8s ease;opacity:.5}
-.stat-desc{font-size:14px;color:var(--dim2);margin-top:6px;line-height:1.4}
+.stat-card{background:var(--bg);border:1px solid var(--border);padding:16px;position:relative;overflow:hidden}
+.stat-card.locked{opacity:.25}
+.stat-card.locked::after{content:'—';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:18px;color:var(--dim);letter-spacing:8px;background:rgba(28,31,26,.5)}
+.stat-card-name{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2);margin-bottom:12px}
+.stat-bar-wrap{height:1px;background:var(--border2);position:relative}
+.stat-bar-fill{height:1px;transition:width 1s ease;position:absolute;top:0;left:0}
+.stat-desc{font-size:13px;color:var(--dim2);margin-top:10px;line-height:1.6}
 
-/* DONATE */
 .donate-input{
-  width:100%;background:#090912;border:1px solid var(--border2);
-  color:var(--pixel);font-family:'VT323',monospace;font-size:22px;
-  padding:8px 10px;outline:none;margin:8px 0;transition:border-color .2s;
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border2);
+  color:var(--text);font-family:'Space Mono',monospace;font-size:22px;
+  padding:8px 0;outline:none;margin:8px 0;transition:border-color .3s;
 }
-.donate-input:focus{border-color:var(--accent)}
+.donate-input:focus{border-bottom-color:var(--accent)}
 .donate-input::placeholder{color:var(--dim)}
 .btn{
-  font-family:'Press Start 2P',monospace;font-size:7px;
-  padding:10px 14px;border:1px solid;cursor:pointer;
-  background:transparent;text-transform:uppercase;letter-spacing:1px;
-  transition:all .12s;width:100%;margin-top:6px;display:block;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  padding:13px 20px;border:1px solid var(--border2);cursor:pointer;
+  background:transparent;transition:all .2s;width:100%;margin-top:10px;display:block;color:var(--dim2);
 }
-.btn:active{transform:translate(1px,1px)}
+.btn:hover{border-color:var(--glow);color:var(--glow)}
 .btn-green{color:var(--accent);border-color:var(--accent)}
-.btn-green:hover{background:var(--accent);color:var(--bg)}
-.quick-row{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}
-.qbtn{
-  font-family:'Press Start 2P',monospace;font-size:6px;
-  padding:5px 8px;border:1px solid var(--border2);
-  background:#0a0a12;color:var(--dim2);cursor:pointer;transition:all .15s;
+.btn-green:hover{background:rgba(120,160,100,.07);color:var(--glow);border-color:var(--glow)}
+.quick-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.qbtn{font-family:'Space Mono',monospace;font-size:10px;padding:5px 12px;border:1px solid var(--border);background:transparent;color:var(--dim2);cursor:pointer;transition:all .2s}
+.qbtn:hover{border-color:var(--sand);color:var(--sand)}
+
+/* Cause choice buttons */
+.cause-row{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.cause-btn{
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;
+  padding:10px 14px;border:1px solid var(--border);cursor:pointer;
+  background:transparent;transition:all .2s;color:var(--dim2);text-align:left;
+  display:flex;justify-content:space-between;align-items:center;
 }
-.qbtn:hover{border-color:var(--yellow);color:var(--yellow)}
+.cause-btn:hover{border-color:var(--glow);color:var(--text)}
+.cause-btn.selected{border-color:var(--glow);color:var(--text);background:rgba(120,160,100,.06)}
+.cause-btn .cause-org{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim2)}
+.cause-btn.selected .cause-org{color:var(--glow)}
 
-/* FEED */
 .feed{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.feed-item{font-size:16px;padding:6px 0;border-bottom:1px solid #111118;opacity:0;animation:fin .4s forwards}
-.ft{color:var(--dim);font-size:13px}
+.feed-item{font-size:14px;padding:8px 0;border-bottom:1px solid var(--border);opacity:0;animation:fin .5s forwards;line-height:1.5}
+.ft{color:var(--dim2);font-size:11px;font-family:'Space Mono',monospace}
 .fp{color:var(--accent)}
-@keyframes fin{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+@keyframes fin{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 
-/* ROADMAP */
 .roadmap{display:flex;flex-direction:column}
-.road-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.road-item{display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
 .road-item:last-child{border-bottom:none}
-.road-dot{width:12px;height:12px;border:2px solid var(--border2);flex-shrink:0;margin-top:4px;transition:all .3s}
-.road-dot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(168,216,168,.4)}
+.road-dot{width:5px;height:5px;border:1px solid var(--border2);border-radius:50%;flex-shrink:0;margin-top:7px;transition:all .4s}
+.road-dot.active{background:var(--glow);border-color:var(--glow)}
 .road-dot.done{background:var(--dim);border-color:var(--dim)}
-.road-stage{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--pixel);margin-bottom:4px}
-.road-desc{font-size:15px;color:var(--dim2);line-height:1.4}
-.road-needs{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-.need-tag{font-family:'Press Start 2P',monospace;font-size:5px;padding:3px 6px;border:1px solid var(--border2);color:var(--dim2)}
+.road-stage{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-bottom:4px}
+.road-desc{font-size:14px;color:var(--dim2);line-height:1.6}
+.road-needs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.need-tag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 8px;border:1px solid var(--border2);color:var(--dim2);text-transform:uppercase}
 .need-tag.known{border-color:var(--accent);color:var(--accent)}
 .need-tag.hidden{border-color:var(--border);color:var(--dim)}
 
-/* STORY */
-.story-post{border-left:2px solid var(--accent);padding:12px 16px;margin-bottom:14px;background:#0a0a12}
-.story-date{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--dim2);margin-bottom:6px}
-.story-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--yellow);margin-bottom:8px;line-height:1.6}
-.story-body{font-size:17px;color:var(--dim2);line-height:1.6}
+.story-post{border-left:1px solid var(--border2);padding:12px 18px;margin-bottom:18px}
+.story-date{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.story-title{font-size:18px;font-weight:400;color:var(--sand);margin-bottom:8px;line-height:1.5}
+.story-body{font-size:15px;color:var(--dim2);line-height:1.9}
 
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}.egg-svg-container{width:220px;height:220px}}
 
-#toast{
-  position:fixed;bottom:28px;left:50%;
-  transform:translateX(-50%) translateY(80px);
-  background:var(--panel);border:1px solid var(--accent);
-  color:var(--accent);font-family:'Press Start 2P',monospace;font-size:7px;
-  padding:12px 20px;z-index:9998;transition:transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;
-}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--border2);color:var(--accent);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;padding:12px 24px;z-index:9998;transition:transform .4s cubic-bezier(.4,0,.2,1);white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0)}
-#toast.warn{border-color:var(--yellow);color:var(--yellow)}
+#toast.warn{border-color:var(--sand);color:var(--sand)}
 
-.float-pt{
-  position:fixed;pointer-events:none;
-  font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent);
-  animation:float-up 1.4s forwards;z-index:9997;
-}
-@keyframes float-up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px)}}
+.float-pt{position:fixed;pointer-events:none;font-family:'Space Mono',monospace;font-size:11px;color:var(--glow);animation:float-up 1.8s forwards;z-index:9997}
+@keyframes float-up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
 
-footer{text-align:center;padding:48px 0 20px;color:var(--dim);font-size:16px;border-top:1px solid var(--border);margin-top:48px}
-footer a{color:var(--accent);text-decoration:none}
-footer a:hover{text-decoration:underline}
+footer{text-align:center;padding:60px 0 24px;color:var(--dim2);font-size:12px;border-top:1px solid var(--border);margin-top:60px;font-family:'Space Mono',monospace;letter-spacing:1px;line-height:2.2}
+footer a{color:var(--dim2);text-decoration:none}
+footer a:hover{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -199,34 +155,108 @@ footer a:hover{text-decoration:underline}
 <div class="wrap">
 
 <header>
-  <div class="logo">SAMAGOTCHI</div>
+  <div class="logo">Samagotchi</div>
   <div class="sub-logo">a community-raised being</div>
-  <div class="tagline">
-    she has needs. you can meet them.<br>
-    your care is real — it goes somewhere.
-  </div>
+  <div class="tagline">something is here. it needs care.</div>
 </header>
 
 <!-- EGG -->
-<div class="panel" style="margin-top:24px">
-  <div class="ptitle">▶ STAGE 01 — THE EGG</div>
+<div class="panel" style="margin-top:32px">
+  <div class="ptitle">Stage I &nbsp;·&nbsp; The Egg</div>
   <div class="egg-stage">
-    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:280px;height:280px">
+    <div class="egg-wrap">
       <div class="pulse-ring"></div>
       <div class="pulse-ring"></div>
       <div class="pulse-ring"></div>
-      <canvas id="eggCanvas" width="48" height="48"></canvas>
+      <div class="egg-svg-container" id="egg-container">
+        <svg id="egg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+          <defs>
+            <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#1a1a2e"/>
+              <stop offset="100%" stop-color="#080810"/>
+            </radialGradient>
+            <radialGradient id="eggBody" cx="38%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="30%" stop-color="#e8e8f8"/>
+              <stop offset="60%" stop-color="#c8c8e8"/>
+              <stop offset="85%" stop-color="#a0a0cc"/>
+              <stop offset="100%" stop-color="#7878aa"/>
+            </radialGradient>
+            <radialGradient id="eggShadow" cx="65%" cy="65%" r="55%">
+              <stop offset="0%" stop-color="#6060aa" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#6060aa" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="60%" stop-color="#8888cc" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#9999dd" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#aaaaee" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="specular" cx="35%" cy="30%" r="30%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+              <stop offset="60%" stop-color="#ffffff" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="warmGlow" cx="50%" cy="55%" r="50%">
+              <stop offset="0%" stop-color="#a8d8a8" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#a8d8a8" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8"/>
+            </filter>
+            <filter id="tinyBlur">
+              <feGaussianBlur stdDeviation="1.2"/>
+            </filter>
+            <clipPath id="eggClip">
+              <path d="M 250 95 C 310 95,385 155,392 240 C 400 330,355 415,250 420 C 145 415,100 330,108 240 C 115 155,190 95,250 95 Z"/>
+            </clipPath>
+          </defs>
 
+          <ellipse cx="258" cy="262" rx="148" ry="162" fill="#7070bb" opacity="0.18" filter="url(#softBlur)"/>
+
+          <!-- Main egg -->
+          <path id="egg-path" d="M 250 95 C 310 95,385 155,392 240 C 400 330,355 415,250 420 C 145 415,100 330,108 240 C 115 155,190 95,250 95 Z" fill="url(#eggBody)" filter="url(#tinyBlur)"/>
+          <path d="M 250 95 C 310 95,385 155,392 240 C 400 330,355 415,250 420 C 145 415,100 330,108 240 C 115 155,190 95,250 95 Z" fill="url(#eggShadow)"/>
+
+          <!-- Warm glow overlay — animates with progress -->
+          <path d="M 250 95 C 310 95,385 155,392 240 C 400 330,355 415,250 420 C 145 415,100 330,108 240 C 115 155,190 95,250 95 Z" fill="url(#warmGlow)" id="egg-warm-overlay" clip-path="url(#eggClip)"/>
+
+          <!-- Cracks — opacity driven by JS -->
+          <g id="egg-cracks" opacity="0" stroke="#9090cc" stroke-linecap="round" fill="none">
+            <path id="crack-1" d="M 240 310 L 248 295 L 244 278" stroke-width="2"/>
+            <path id="crack-2" d="M 248 295 L 260 300 L 265 285" stroke-width="1.5"/>
+            <path id="crack-3" d="M 244 278 L 238 265 L 245 252" stroke-width="1" opacity="0"/>
+          </g>
+
+          <!-- Glow light from inside cracks -->
+          <g id="crack-glow" opacity="0" clip-path="url(#eggClip)">
+            <ellipse cx="250" cy="290" rx="30" ry="20" fill="#c8e8c8" filter="url(#softBlur)"/>
+          </g>
+
+          <path d="M 250 95 C 310 95,385 155,392 240 C 400 330,355 415,250 420 C 145 415,100 330,108 240 C 115 155,190 95,250 95 Z" fill="url(#specular)"/>
+
+          <!-- Sparkle dots -->
+          <g fill="#aaaadd" opacity="0.4">
+            <circle cx="90" cy="120" r="1.5"/><circle cx="410" cy="155" r="1"/>
+            <circle cx="75" cy="340" r="1"/><circle cx="420" cy="380" r="1.5"/>
+            <circle cx="130" cy="430" r="1"/><circle cx="370" cy="80" r="1"/>
+            <circle cx="60" cy="250" r="0.8"/><circle cx="440" cy="270" r="1.2"/>
+          </g>
+
+          <text x="250" y="462" text-anchor="middle" font-family="'Cormorant Garamond',serif" font-size="18" letter-spacing="8" fill="#6666aa" opacity="0.7">???</text>
+        </svg>
+      </div>
     </div>
+
     <div class="egg-caption">
-      <span class="hl">something is here.</span><br>
-      we don't know what she needs yet.<br>
-      but she's listening.
+      an egg.<br>
+      unknown origin. unknown contents.<br>
+      it needs <span class="hl">warmth</span>. it needs <span class="hl">shelter</span>.
     </div>
+
     <div class="hatch-progress">
       <div class="prog-head">
-        <span class="prog-label">HATCH PROGRESS</span>
-        <span class="prog-val"><span id="prog-pct">0</span>% — <span id="prog-raised">$0</span> of $50</span>
+        <span class="prog-label">Warmth</span>
+        <span class="prog-val"><span id="prog-pct">0</span>% &nbsp;·&nbsp; <span id="prog-raised">$0</span> of $50</span>
       </div>
       <div class="prog-bar">
         <div class="prog-fill" id="prog-fill" style="width:0%"></div>
@@ -234,17 +264,16 @@ footer a:hover{text-decoration:underline}
       <div class="prog-text" id="prog-text">raise $50 together to hatch the egg</div>
     </div>
     <div class="countdown" id="countdown" style="display:none">
-      hatching in <span id="cd-num">5</span>s
+      hatching in <span id="cd-num">5</span>
     </div>
   </div>
 </div>
 
 <!-- STATS PREVIEW -->
-<div class="panel" style="margin-top:16px">
-  <div class="ptitle">▶ HER NEEDS — REVEALED AS SHE GROWS</div>
-  <p style="font-size:16px;color:var(--dim2);line-height:1.5;margin-bottom:16px">
-    Sama will have needs. Some we can already sense. Others she'll show us herself as she grows.
-    Each need maps to something real — something your care actually funds.
+<div class="panel" style="margin-top:12px">
+  <div class="ptitle">Observed Needs</div>
+  <p style="font-size:14px;color:var(--dim2);line-height:1.8;margin-bottom:16px">
+    Needs are revealed as she grows. Each one maps to a real cause.
   </p>
   <div class="stats-preview" id="stats-preview"></div>
 </div>
@@ -252,34 +281,61 @@ footer a:hover{text-decoration:underline}
 <!-- DONATE + FEED -->
 <div class="two-col">
   <div class="panel">
-    <div class="ptitle">▶ WARM THE EGG</div>
-    <p style="font-size:16px;color:var(--dim2);line-height:1.5;margin-bottom:12px">
-      Every donation warms the egg. At $50 she hatches. All funds go to the food bank smoothie project — complete nutrition at $2.50/person/day.
+    <div class="ptitle">Contribute</div>
+    <p style="font-size:14px;color:var(--dim2);line-height:1.8;margin-bottom:20px">
+      Choose where your contribution goes. All funds are forwarded directly to the selected organisation.
     </p>
-    <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--dim2);margin-bottom:4px">AMOUNT (USD)</div>
-    <input class="donate-input" id="donate-amt" type="number" min="1" placeholder="$5"/>
-    <div class="quick-row">
-      <button class="qbtn" onclick="setAmt(1)">$1</button>
-      <button class="qbtn" onclick="setAmt(3)">$3</button>
-      <button class="qbtn" onclick="setAmt(5)">$5</button>
-      <button class="qbtn" onclick="setAmt(10)">$10</button>
-      <button class="qbtn" onclick="setAmt(25)">$25</button>
+
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2);margin-bottom:8px">Warmth — disaster relief</div>
+    <div class="cause-row" id="warmth-causes">
+      <button class="cause-btn selected" onclick="selectCause('warmth',0,this)" data-cause="warmth">
+        <span>Direct Relief</span>
+        <span class="cause-org">directrelief.org</span>
+      </button>
+      <button class="cause-btn" onclick="selectCause('warmth',1,this)" data-cause="warmth">
+        <span>IFRC — Red Cross</span>
+        <span class="cause-org">ifrc.org</span>
+      </button>
+      <button class="cause-btn" onclick="selectCause('warmth',2,this)" data-cause="warmth">
+        <span>OCHA</span>
+        <span class="cause-org">unocha.org</span>
+      </button>
     </div>
-    <button class="btn btn-green" onclick="donate()">▶ WARM THE EGG</button>
-    <p style="font-size:13px;color:var(--dim);margin-top:10px;line-height:1.4">
-      $1 = 2% warmth · $5 = 10% warmth · $50 hatches her
-    </p>
-    <div style="margin-top:16px;padding:12px;background:#090912;border:1px solid var(--border)">
-      <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--food-c);margin-bottom:6px">🥤 FOOD BANK SMOOTHIES</div>
-      <div style="font-size:15px;color:var(--dim2);line-height:1.4">Complete nutrition · $2.50/person/day · direct to food banks</div>
-      <div style="height:6px;background:#060610;border:1px solid var(--border);margin-top:8px;overflow:hidden">
-        <div id="cause-fill" style="height:100%;background:var(--food-c);width:0%;transition:width 1s ease"></div>
+
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2);margin-bottom:8px;margin-top:20px">Shelter — displacement & reconstruction</div>
+    <div class="cause-row" id="shelter-causes">
+      <button class="cause-btn selected" onclick="selectCause('shelter',0,this)" data-cause="shelter">
+        <span>UNHCR — Refugee Agency</span>
+        <span class="cause-org">unhcr.org</span>
+      </button>
+      <button class="cause-btn" onclick="selectCause('shelter',1,this)" data-cause="shelter">
+        <span>IRC — Rescue Committee</span>
+        <span class="cause-org">rescue.org</span>
+      </button>
+      <button class="cause-btn" onclick="selectCause('shelter',2,this)" data-cause="shelter">
+        <span>ShelterBox</span>
+        <span class="cause-org">shelterbox.org</span>
+      </button>
+    </div>
+
+    <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim2);margin-bottom:4px">Amount (USD)</div>
+      <input class="donate-input" id="donate-amt" type="number" min="1" placeholder="5" onkeydown="if(event.key==='Enter')donate()"/>
+      <div class="quick-row">
+        <button class="qbtn" onclick="setAmt(1)">$1</button>
+        <button class="qbtn" onclick="setAmt(5)">$5</button>
+        <button class="qbtn" onclick="setAmt(10)">$10</button>
+        <button class="qbtn" onclick="setAmt(25)">$25</button>
       </div>
+      <button class="btn btn-green" onclick="donate()">Contribute</button>
+      <p style="font-size:12px;color:var(--dim);margin-top:10px;line-height:1.6">
+        $50 total hatches the egg &nbsp;·&nbsp; <span id="prog-raised-inline">$0</span> raised so far
+      </p>
     </div>
   </div>
 
   <div class="panel">
-    <div class="ptitle">▶ COMMUNITY WARMTH</div>
+    <div class="ptitle">Activity</div>
     <div class="feed" id="feed"></div>
     <div style="margin-top:12px;padding:10px;background:#090912;border:1px solid var(--border);text-align:center">
       <span style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--accent)" id="warmer-count">0</span>
@@ -291,21 +347,21 @@ footer a:hover{text-decoration:underline}
 <!-- STORY + ROADMAP -->
 <div class="two-col">
   <div class="panel">
-    <div class="ptitle">▶ THE STORY SO FAR</div>
+    <div class="ptitle">Log</div>
     <div id="story-posts">
       <div class="story-post">
-        <div class="story-date">DAY 01</div>
+        <div class="story-date">Entry 001</div>
         <div class="story-title">there's an egg.</div>
         <div class="story-body">
-          we found it. we don't know where it came from or what's inside.<br><br>
-          but it's warm, and it's here, and something about it feels like it matters.<br><br>
-          we're going to take care of it together.
+          unknown origin. unknown contents.<br><br>
+          it is here. it is warm to the touch.<br><br>
+          we are going to find out what it needs.
         </div>
       </div>
     </div>
   </div>
   <div class="panel">
-    <div class="ptitle">▶ SAMA'S JOURNEY</div>
+    <div class="ptitle">Development Stages</div>
     <div class="roadmap" id="roadmap"></div>
   </div>
 </div>
@@ -313,34 +369,33 @@ footer a:hover{text-decoration:underline}
 </div><!-- /wrap -->
 
 <footer>
-  <p>SAMAGOTCHI — care together, grow together</p>
-  <p style="margin-top:8px;font-size:14px">
-    <a href="#">Substack</a> · <a href="#">Reddit</a> ·
-    <a href="#">Food Bank Smoothie Project</a> ·
-    <a href="#">School Garden Initiative</a>
+  <p>Samagotchi &nbsp;·&nbsp; care together, grow together</p>
+  <p style="margin-top:8px">
+    <a href="#">Substack</a> &nbsp;·&nbsp; <a href="#">Reddit</a> &nbsp;·&nbsp;
+    <a href="#">Direct Relief</a> &nbsp;·&nbsp; <a href="#">UNHCR</a>
   </p>
-  <p style="margin-top:10px;font-size:13px;color:var(--dim)">100% of donations go directly to community projects</p>
+  <p style="margin-top:8px;color:var(--dim)">100% of contributions are forwarded to selected organisations</p>
 </footer>
 
 <div id="toast"></div>
 
 <script>
+// ── CAUSE SELECTION ───────────────────────────────────
+const selectedCauses = { warmth: 0, shelter: 0 };
+
+function selectCause(type, idx, btn) {
+  selectedCauses[type] = idx;
+  btn.closest('.cause-row').querySelectorAll('.cause-btn')
+    .forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
 // ═══════════════════════════════════════════════════════
 // SAMAGOTCHI — v1 FOUNDATION  (Egg Stage)
 // Illness system: present, dormant, ready to reveal
 // Stats: seeded but hidden until stage unlocks them
 // Stability: requires spread of unique contributors over days
 // ═══════════════════════════════════════════════════════
-
-// Stars
-const starsEl = document.getElementById('stars');
-for (let i = 0; i < 70; i++) {
-  const s = document.createElement('div');
-  const sz = Math.random() > .7 ? 2 : 1;
-  s.className = 'star';
-  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--dl:${Math.random()*4}s;--b:${.2+Math.random()*.6}`;
-  starsEl.appendChild(s);
-}
 
 // ── STATE ──────────────────────────────────────────────
 const S = {
@@ -456,263 +511,85 @@ const illnessSystem = {
   },
 };
 
-// ── EGG CANVAS ────────────────────────────────────────
-const eggC = document.getElementById('eggCanvas');
-const eCtx = eggC.getContext('2d');
-eCtx.imageSmoothingEnabled = false;
+// ── SVG EGG ANIMATION ────────────────────────────────
+const eggContainer = document.getElementById('egg-container');
+const eggSvg       = document.getElementById('egg-svg');
+const eggCracks    = document.getElementById('egg-cracks');
+const crackGlow    = document.getElementById('crack-glow');
+const crack3el     = document.getElementById('crack-3');
+const warmGradEl   = document.getElementById('warmGlow');
 
-const EP = {
-  _:null, BG:'#090912',
-  W:'#e8e4d8', Ws:'#c8c4b4', Wh:'#f4f0e8', Sp:'#b8b4a8',
-  G1:'#b8d8c0', G2:'#a0c8a8',
-};
+let eggBobT = 0;
+let hatchBurst = null;
 
-const EGG = [
-  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
-  '_','_','_','_','_','Ws','W','W','Ws','_','_','_','_','_','_','_',
-  '_','_','_','_','Ws','W','Wh','W','W','Ws','_','_','_','_','_','_',
-  '_','_','_','Ws','W','W','Wh','Wh','W','W','Ws','_','_','_','_','_',
-  '_','_','_','W','W','W','W','W','W','W','W','_','_','_','_','_',
-  '_','_','Ws','W','W','Sp','W','W','W','Sp','W','Ws','_','_','_','_',
-  '_','_','W','W','W','W','W','W','W','W','W','W','_','_','_','_',
-  '_','_','W','W','Sp','W','W','W','Sp','W','W','W','_','_','_','_',
-  '_','_','W','W','W','W','W','W','W','W','W','W','_','_','_','_',
-  '_','_','Ws','W','W','W','Sp','W','W','W','W','Ws','_','_','_','_',
-  '_','_','_','Ws','W','W','W','W','W','W','Ws','_','_','_','_','_',
-  '_','_','_','_','Ws','W','W','W','W','Ws','_','_','_','_','_','_',
-  '_','_','_','_','_','Ws','Ws','Ws','Ws','_','_','_','_','_','_','_',
-  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
-  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
-  '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
-];
-
-// Cracks drawn directly on egg canvas, relative to egg's own coordinate space
-const CRACK_LINES = [
-  [[7,5],[8,6],[8,7],[7,8],[6,9]],
-  [[8,6],[9,6],[10,7],[10,8]],
-  [[7,8],[7,9],[6,10],[6,11]],
-];
-
-let eggBob = 0, eggBobDir = 1;
-let hatchBurst = null; // { t: 0, particles: [] }
-
-function drawEgg() {
-  if (S.hatched && !hatchBurst) {
-    requestAnimationFrame(drawEgg);
-    return;
-  }
-
+function animateEgg() {
+  if (S.hatched && !hatchBurst) return;
+  eggBobT += 0.018;
   const pct = Math.min(1, S.raised / S.goal);
-  eCtx.fillStyle = EP.BG;
-  eCtx.fillRect(0, 0, 48, 48);
 
-  // ── Hatch burst animation ──
-  if (hatchBurst) {
-    drawHatchBurst();
-    requestAnimationFrame(drawEgg);
-    return;
-  }
+  const bobY  = Math.sin(eggBobT) * 6;
+  const wobX  = pct > .6 ? Math.sin(eggBobT * 2.2) * (pct > .85 ? 4 : 2) : 0;
+  const scale = pct > .85 ? 1 + Math.max(0, Math.sin(eggBobT * 3)) * 0.012 : 1;
 
-  // ── Normal egg animation ──
-  eggBob += eggBobDir * (0.004 + pct * 0.02);
-  if (eggBob > 1) eggBobDir = -1;
-  if (eggBob < 0) eggBobDir = 1;
+  eggSvg.style.transform = `translate(${wobX}px, ${bobY}px) scale(${scale})`;
+  eggSvg.style.transformOrigin = 'center center';
 
-  const wobX = pct > .6 ? Math.round(Math.sin(Date.now() / 100) * (pct > .85 ? 2 : 1)) : 0;
-  const bobY = Math.round(eggBob);
-
-  // Draw egg sprite — cracks and egg share the same transform (bobY, wobX)
-  eCtx.save();
-  eCtx.translate(wobX, bobY);
-
-  EGG.forEach((k, i) => {
-    if (!EP[k]) return;
-    let col = EP[k];
-    if (pct > .5 && k === 'W')  col = EP.G1;
-    if (pct > .7 && k === 'Wh') col = EP.G2;
-    eCtx.fillStyle = col;
-    eCtx.fillRect((i % 16) * 3, Math.floor(i / 16) * 3, 3, 3);
-  });
-
-  // Draw cracks on same layer — perfectly attached
   if (pct > .5) {
-    const crackAlpha = Math.min(1, (pct - .5) * 2.5);
-    eCtx.strokeStyle = `rgba(50,30,10,${crackAlpha})`;
-    eCtx.lineWidth = 1;
-    const numC = pct > .85 ? 3 : pct > .7 ? 2 : 1;
-    for (let c = 0; c < numC; c++) {
-      const pts = CRACK_LINES[c];
-      eCtx.beginPath();
-      eCtx.moveTo(pts[0][0]*3+1, pts[0][1]*3+1);
-      for (let p = 1; p < pts.length; p++) {
-        eCtx.lineTo(pts[p][0]*3+1, pts[p][1]*3+1);
-      }
-      eCtx.stroke();
-    }
+    const crackA = Math.min(0.9, (pct - .5) * 2.5);
+    eggCracks.setAttribute('opacity', crackA);
+    crackGlow.setAttribute('opacity', crackA * 0.6);
+    if (pct > .75 && crack3el) crack3el.setAttribute('opacity', Math.min(1, (pct - .75) * 4));
   }
 
-  eCtx.restore();
-
-  // Glow halo (outside transform so it stays centred)
-  if (pct > .15) {
-    eCtx.save();
-    const gr = eCtx.createRadialGradient(24,24,6,24,24,26);
-    const a = Math.min(.55, (pct - .15) * .7);
-    gr.addColorStop(0, `rgba(168,216,168,${a})`);
-    gr.addColorStop(1, 'rgba(168,216,168,0)');
-    eCtx.globalCompositeOperation = 'screen';
-    eCtx.fillStyle = gr;
-    eCtx.fillRect(0,0,48,48);
-    eCtx.restore();
+  if (pct > .2 && warmGradEl) {
+    const warmA = Math.min(0.35, (pct - .2) * 0.5);
+    warmGradEl.children[0].setAttribute('stop-opacity', warmA * 0.8);
+    warmGradEl.children[1].setAttribute('stop-opacity', warmA * 0.3);
   }
 
-  // Heartbeat scale near hatch
-  if (pct > .85) {
-    const beat = 1 + Math.max(0, Math.sin(Date.now()/200)) * .025;
-    eggC.style.transform = `scale(${beat})`;
-  }
-
-  requestAnimationFrame(drawEgg);
+  requestAnimationFrame(animateEgg);
 }
-drawEgg();
-
-// ── HATCH BURST ───────────────────────────────────────
-// Shell splits into top cap and bottom half, drifting apart
-// Top cap tumbles upward, bottom half falls away
-// Soft warm light spills from the gap
-
-// ── SHELL SPLIT — pixels partitioned by crack line ────
-// Crack runs roughly from (7,5) down through (7,8)→(6,11)
-// "Above crack" = top cap, "below crack" = bottom piece
-// We use a simple boundary: pixels where row < crackRowAt(col)
-function crackRowAt(col) {
-  // Approximate the main crack diagonal in sprite coords
-  if (col <= 6)  return 9;
-  if (col <= 7)  return 7;
-  if (col <= 8)  return 6;
-  return 99; // everything else is bottom
-}
-
-const SHELL_TOP    = [];
-const SHELL_BOTTOM = [];
-
-EGG.forEach((k, i) => {
-  if (!EP[k]) return;
-  const row = Math.floor(i / 16);
-  const col = i % 16;
-  const px  = { x: col * 3, y: row * 3, col: EP[k] };
-  if (row < crackRowAt(col)) SHELL_TOP.push(px);
-  else                        SHELL_BOTTOM.push(px);
-});
-
-// Draw a shell piece with a 1px dark shadow outline
-function drawShellPiece(pixels, offsetX, offsetY, rot, pivotX, pivotY, alpha) {
-  eCtx.save();
-  eCtx.globalAlpha = alpha;
-  eCtx.translate(pivotX + offsetX, pivotY + offsetY);
-  eCtx.rotate(rot);
-  eCtx.translate(-pivotX, -pivotY);
-
-  // Shadow outline — draw pixels offset by 1px in 4 directions in dark colour
-  const shadow = 'rgba(0,0,0,0.35)';
-  const offsets = [[1,0],[-1,0],[0,1],[0,-1]];
-  pixels.forEach(p => {
-    eCtx.fillStyle = shadow;
-    offsets.forEach(([dx,dy]) =>
-      eCtx.fillRect(p.x + dx, p.y + dy, 3, 3)
-    );
-  });
-  // Draw actual pixels on top
-  pixels.forEach(p => {
-    eCtx.fillStyle = p.col;
-    eCtx.fillRect(p.x, p.y, 3, 3);
-  });
-
-  eCtx.restore();
-}
+animateEgg();
 
 function triggerHatchBurst() {
-  // Crack origin is around sprite pixel (7,6) = canvas (21,18)
-  hatchBurst = {
-    t: 0,
-    // Top cap peels away upward, pivoting from crack origin, tilting left
-    top: { x:0, y:0, rot:0, vx:-0.15, vy:-0.5, vrot:-0.03, vy_gravity:0.01, alpha:1, pivX:21, pivY:18 },
-    // Bottom piece drops down and right, pivoting from crack origin
-    bot: { x:0, y:0, rot:0, vx:0.1,  vy:0.4,  vrot:0.025, vy_gravity:0.035, alpha:1, pivX:21, pivY:18 },
-    // Tiny light motes from crack seam
-    motes: Array.from({length:8}, () => ({
-      x: 18 + Math.random() * 8,
-      y: 16 + Math.random() * 8,
-      vx: (Math.random() - .5) * 0.5,
-      vy: -0.6 - Math.random() * 0.4,
-      alpha: 1,
-      col: ['#f4f0e8','#c8f0c8','#ffffff','#a8d8a8'][Math.floor(Math.random()*4)],
-    })),
-  };
-  eggC.style.transform = 'scale(1)';
-}
+  const burst = document.createElement('div');
+  burst.style.cssText = 'position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:10;';
 
-function drawHatchBurst() {
-  const b = hatchBurst;
-  b.t += 0.022;
-  const t = b.t;
+  const pieces = [
+    { clip:'polygon(15% 0%, 85% 0%, 90% 48%, 50% 44%, 10% 48%)', tx:'-25px', ty:'-70px', rot:'-14deg' },
+    { clip:'polygon(10% 52%, 90% 52%, 85% 100%, 15% 100%)',       tx:'18px',  ty:'75px',  rot:'11deg'  },
+    { clip:'polygon(0% 15%, 18% 15%, 12% 85%, 0% 85%)',           tx:'-55px', ty:'8px',   rot:'-18deg' },
+    { clip:'polygon(82% 15%, 100% 15%, 100% 85%, 88% 85%)',       tx:'55px',  ty:'4px',   rot:'16deg'  },
+  ];
 
-  eCtx.fillStyle = EP.BG;
-  eCtx.fillRect(0, 0, 48, 48);
-
-  // Soft warm glow growing from crack origin
-  eCtx.save();
-  const glowR = Math.min(32, 4 + t * 50);
-  const glowA = Math.min(0.85, t * 1.8);
-  const gr = eCtx.createRadialGradient(21, 20, 0, 21, 20, glowR);
-  gr.addColorStop(0,   `rgba(210,255,210,${glowA})`);
-  gr.addColorStop(0.5, `rgba(168,216,168,${glowA * 0.5})`);
-  gr.addColorStop(1,   'rgba(168,216,168,0)');
-  eCtx.globalCompositeOperation = 'screen';
-  eCtx.fillStyle = gr;
-  eCtx.fillRect(0, 0, 48, 48);
-  eCtx.restore();
-
-  // Top cap — peels up and away, fades after delay
-  const top = b.top;
-  top.x   += top.vx;
-  top.y   += top.vy;
-  top.vy  += top.vy_gravity;
-  top.rot += top.vrot;
-  top.alpha = Math.max(0, 1 - Math.max(0, t - 0.7) * 1.8);
-  if (top.alpha > 0)
-    drawShellPiece(SHELL_TOP, top.x, top.y, top.rot, top.pivX, top.pivY, top.alpha);
-
-  // Bottom piece — drops down with gravity, fades
-  const bot = b.bot;
-  bot.x   += bot.vx;
-  bot.y   += bot.vy;
-  bot.vy  += bot.vy_gravity;
-  bot.rot += bot.vrot;
-  bot.alpha = Math.max(0, 1 - Math.max(0, t - 0.55) * 1.6);
-  if (bot.alpha > 0)
-    drawShellPiece(SHELL_BOTTOM, bot.x, bot.y, bot.rot, bot.pivX, bot.pivY, bot.alpha);
-
-  // Light motes rising from seam
-  b.motes.forEach(m => {
-    m.x += m.vx;
-    m.y += m.vy;
-    m.vy += 0.01; // slight float resistance
-    m.alpha = Math.max(0, 1 - t * 1.4);
-    if (m.alpha <= 0) return;
-    eCtx.globalAlpha = m.alpha;
-    eCtx.fillStyle = m.col;
-    eCtx.fillRect(Math.round(m.x), Math.round(m.y), 2, 2);
+  pieces.forEach(p => {
+    const div = document.createElement('div');
+    div.style.cssText = `position:absolute;width:320px;height:320px;background:radial-gradient(ellipse at 38% 35%, #ffffff, #e8e8f8 30%, #c8c8e8 60%, #a0a0cc 85%, #7878aa);clip-path:${p.clip};transition:transform 1.4s cubic-bezier(.15,.9,.3,1), opacity 0.9s ease 0.3s;opacity:1;`;
+    burst.appendChild(div);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      div.style.transform = `translate(${p.tx}, ${p.ty}) rotate(${p.rot})`;
+      div.style.opacity = '0';
+    }));
   });
 
-  eCtx.globalAlpha = 1;
+  const light = document.createElement('div');
+  light.style.cssText = 'position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle, rgba(200,240,200,0.85) 0%, rgba(168,216,168,0.35) 55%, transparent 75%);transition:transform 1s ease,opacity 0.9s ease 0.5s;transform:scale(0.1);opacity:0;';
+  burst.appendChild(light);
+  eggContainer.appendChild(burst);
 
-  if (t > 2.0) {
-    hatchBurst = null;
-    eCtx.fillStyle = EP.BG;
-    eCtx.fillRect(0, 0, 48, 48);
-  }
+  eggSvg.style.transition = 'opacity 0.4s, transform 0.4s';
+  eggSvg.style.opacity = '0';
+  eggSvg.style.transform = 'scale(1.06)';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    light.style.transform = 'scale(2.8)';
+    light.style.opacity = '1';
+    setTimeout(() => { light.style.opacity = '0'; }, 500);
+  }));
+
+  setTimeout(() => { burst.remove(); hatchBurst = null; }, 2200);
 }
+
 
 // ── STATS PREVIEW ─────────────────────────────────────
 function renderStatsPreview() {
@@ -802,19 +679,26 @@ function donate() {
   document.getElementById('prog-pct').textContent    = Math.round(pct * 100);
   document.getElementById('prog-raised').textContent = '$' + S.raised.toFixed(2);
   document.getElementById('prog-fill').style.width   = (pct * 100) + '%';
-  document.getElementById('cause-fill').style.width  = (pct * 100) + '%';
+  const inlineRaised = document.getElementById('prog-raised-inline');
+  if (inlineRaised) inlineRaised.textContent = '$' + S.raised.toFixed(2);
   document.getElementById('warmer-count').textContent = S.warmers;
 
   const rem = (S.goal - S.raised).toFixed(2);
   document.getElementById('prog-text').textContent =
-    pct >= 1   ? '★ hatching! ★' :
-    pct > .8   ? `almost there — $${rem} to go` :
-    pct > .5   ? `she can feel the warmth — $${rem} to go` :
-                 `raise $${rem} more to hatch the egg`;
+    pct >= 1   ? 'hatching.' :
+    pct > .8   ? `$${rem} remaining` :
+    pct > .5   ? `the egg is changing — $${rem} remaining` :
+                 `$${rem} until it hatches`;
 
-  addFeed('anonymous', amount, `egg is ${Math.round(pct*100)}% warm 🥚`);
-  spawnFloat(`+${Math.round(amount*2)}% warmth`);
-  showToast('THE EGG GROWS WARMER ♡', true);
+  const causeNames = {
+    warmth:  ['Direct Relief','IFRC','OCHA'],
+    shelter: ['UNHCR','IRC','ShelterBox'],
+  };
+  const wName = causeNames.warmth[selectedCauses.warmth];
+  const sName = causeNames.shelter[selectedCauses.shelter];
+  addFeed('—', amount, `${wName} + ${sName}`);
+  spawnFloat(`+$${amount.toFixed(2)}`);
+  showToast('contribution recorded', true);
 
   if (pct >= 1 && !S.hatched && !S.hatchingCountdown) {
     S.hatchingCountdown = true;
